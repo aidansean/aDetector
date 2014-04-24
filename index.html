@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html xmlns='http://www.w3.org/1999/xhtml' xml:lang='en' lang='en'>
+<head>
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+<link type="text/css" rel="stylesheet" media="all" href="http://www.aidansean.com/css/style.css" />
+<link type="text/css" rel="stylesheet" media="all" href="style.css" />
+<script type="text/javascript" src="component_cell.js"></script>
+<script type="text/javascript" src="detector.js"></script>
+<script type="text/javascript" src="beampipe.js"></script>
+<script type="text/javascript" src="tracker.js"></script>
+<script type="text/javascript" src="calorimeter.js"></script>
+<script type="text/javascript" src="particle.js"></script>
+<script type="text/javascript" src="p4.js"></script>
+<script type="text/javascript" src="base.js"></script>
+<script type="text/javascript" src="draw.js"></script>
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+<style type="text/css">
+canvas{
+  border : 1px solid black ;
+  margin : auto ;
+}
+</style>
+<title>A Detector</title> 
+</head>
+<body lang="en" onload="start()">
+<div id="outer_container">
+<div id="container">
+  <div id="heading">
+    <h1>aDetector</h1>
+    <p id="tagline">"Now 27% darker and edgier"</p>
+  </div>
+
+  <div id="navcontainer">
+  </div>
+  <div id="content">
+  
+  <div class="tab">
+    <div class="tab_row">
+      <div class="tab_cell">
+          <canvas id="canvas_detector_cutaway" width="500" height="500"></canvas><br />
+      </div>
+      <div class="tab_cell">
+        <canvas id="canvas_detector_transverse" width="250" height="250"></canvas><br />
+        <p class="center">x: <input type="text" id="input_x"/> y: <input type="text" id="input_y"/> z: <input type="text" id="input_z"/><br />
+          &theta;: <input type="text" id="input_t"/> &phi;: <input type="text" id="input_p"/><br />
+          <input type="submit" id="submit_coords" value="Change view"/>
+        </p>
+        
+      </div>
+    </div>
+    <div class="tab_row">
+      <div class="tab_cell">
+        <canvas id="canvas_detector_longitudinal" width="500" height="300"></canvas>
+      </div>
+      <div class="tab_cell"></div>
+    </div>
+  </div>
+  
+  <!--
+  <img id="img_detector_cutaway"      width="400px" height="400px" /><br />
+  <img id="img_detector_transverse"   width="200px" height="200px" /><br />
+  <img id="img_detector_longitudinal" width="200px" height="200px" />
+  -->
+  
+  <pre id="pre_JPsi_mass"></pre>
+  <textarea id="textarea_JPsi_mass" cols="90" rows="10"></textarea>
+  
+  </div>
+  
+  <div id="footer">&copy; 2010-2014 Aidan Randle-Conde
+  <br />
+  Validation: <a href="http://validator.w3.org/check?uri=referer">XHTML</a> / <a href="http://jigsaw.w3.org/css-validator/check/referer?profile=css3">CSS</a>
+  </div>
+  
+</div>
+</div>
+</body>
+</html>
+

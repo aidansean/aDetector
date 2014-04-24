@@ -1,0 +1,17 @@
+div.tab     {
+  display : table ;
+  width : 750px ;
+}
+div.tab_row { display : table-row ; }
+div.tab_cell{
+  display : table-cell ;
+  vertical-align : top ;
+}
+
+div#outer_container{
+  background-color : white ;
+}
+
+input#input_x, input#input_y, input#input_z, input#input_t, input#input_p{
+  width : 40px ;
+}
