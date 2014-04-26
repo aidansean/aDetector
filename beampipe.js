@@ -9,8 +9,12 @@ beampipe_object = function(name, zl, line_opacity, rgb){
   this.ro2 = 0 ;
   
   this.stopping_powers = [] ;
-  this.stopping_powers['electron'] = 1.0 ;
-  this.stopping_powers['muon'    ] = 1.0 ;
+  this.stopping_powers['electron'        ] = 1.0 ;
+  this.stopping_powers['photon'          ] = 1.0 ;
+  this.stopping_powers['muon'            ] = 1.0 ;
+  this.stopping_powers['ephemeral_hadron'] = 1.0 ;
+  this.stopping_powers['charged_hadron'  ] = 1.0 ;
+  this.stopping_powers['neutral_hadron'  ] = 1.0 ;
   
   var cell = new component_cell(this.rgb, this.rgb) ;
   var points = [ [0,0,-0.5*this.z_length] , [0,0,0.5*this.z_length] ] ;

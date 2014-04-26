@@ -1,15 +1,15 @@
-function draw_polygons(r0, t0, p0, particles, canvas, mode, image_name, phi_cut){
+function draw_polygons(r0, t0, p0, particles, canvas, mode, image_name, phi_cut, scale){
   var context = canvas.getContext('2d') ;
   var cw = canvas.width  ;
   var ch = canvas.height ;
   context.fillStyle = 'rgb(255,255,255)' ;
   context.fillRect(0,0,cw,ch) ;
-    
+  
   var particle_polygons = []  ;
   for(var i=0 ; i<particles.length ; i++){
-    for(var j=0 ; j<particles[i].par.path.length-1 ; j++){
-      var l = new polygon_object('255,0,0') ;
-      var p = particles[i].par.path ;
+    for(var j=0 ; j<particles[i].path.length-1 ; j++){
+      var l = new polygon_object(particles[i].color) ;
+      var p = particles[i].path ;
       l.add_point(p[j+0][0], p[j+0][1], p[j+0][2]) ;
       l.add_point(p[j+1][0], p[j+1][1], p[j+1][2]) ;
       l.line_opacity = 1.0 ;
@@ -34,7 +34,6 @@ function draw_polygons(r0, t0, p0, particles, canvas, mode, image_name, phi_cut)
     }
   }
   
-  var scale = 4 ;
   var centroid_z_min =  1e6 ;
   var centroid_z_max = -1e6 ;
   var shapes = [ polygons , lines , particle_polygons ] ;
@@ -56,6 +55,8 @@ function draw_polygons(r0, t0, p0, particles, canvas, mode, image_name, phi_cut)
   var ch = context.canvas.height ;
   
   for(var i=0 ; i<shapes.length ; i++){
+    if(i==2){ context.lineWidth = 3 ; }
+    else{ context.lineWidth = 1 ; }
     for(var j=0 ; j<shapes[i].length ; j++){
       var pol = shapes[i][j] ;
       var phi = 180*Math.atan2(get_centroid(pol.raw_points)[1], get_centroid(pol.raw_points)[0])/Math.PI ;
@@ -121,12 +122,17 @@ function draw_all(particles, mode){
   phi_cuts['cutaway'     ] = 121 ;
   phi_cuts['transverse'  ] = 400 ;
   phi_cuts['longitudinal'] =  91 ;
+  
+  var scales = [] ;
+  scales['cutaway'     ] = 1 ;
+  scales['transverse'  ] = 3 ;
+  scales['longitudinal'] = 4 ;
 
   var names = ['cutaway' , 'transverse' , 'longitudinal'] ;
   for(var i=0 ; i<names.length ; i++){
     var n = names[i] ;
     var canvas  = Get('canvas_detector_'+n) ;
-    draw_polygons(r0s[n], t0s[n], p0s[n], particles, canvas, modes[n], n, phi_cuts[n]) ;
+    draw_polygons(r0s[n], t0s[n], p0s[n], particles, canvas, modes[n], n, phi_cuts[n], scales[n]) ;
   }
 }
 

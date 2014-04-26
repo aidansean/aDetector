@@ -137,13 +137,28 @@ function fourVector(){
   }
   this.alert = function(){
     var string = '' ;
-    string += 'x  = ' + this.x + '\n' ;
-    string += 'y  = ' + this.y + '\n' ;
-    string += 'z  = ' + this.z + '\n' ;
-    string += 't  = ' + this.t + '\n' ;
+    string += 'r  = ' + this.r()  + '\n' ;
+    string += 'x  = ' + this.x    + '\n' ;
+    string += 'y  = ' + this.y    + '\n' ;
+    string += 'z  = ' + this.z    + '\n' ;
+    string += 't  = ' + this.t    + '\n' ;
+    string += 'm  = ' + this.m()  + '\n' ;
     string += 'm2 = ' + this.m2() + '\n' ;
     alert(string) ;
   }
 }
 
+function momentum_two_body_decay(M, m1, m2){
+  return Math.sqrt((M*M-(m1+m2)*(m1+m2))*(M*M-(m1-m2)*(m1-m2)))/(2*M) ;
+}
+function random_threeVector(p){
+  var phi_theta = random_phi_theta() ;
+  var phi   = phi_theta[0] ;
+  var theta = phi_theta[1] ;
+  
+  var px = p*Math.sin(theta)*Math.cos(phi) ;
+  var py = p*Math.sin(theta)*Math.sin(phi) ;
+  var pz = p*Math.cos(theta) ;
+  return[px,py,pz] ;
+}
 

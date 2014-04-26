@@ -27,32 +27,38 @@ function detector_object(){
     this.critical_layers.push( [r2*1.2, null, 'end'] ) ;
   }
   
-  this.process_particle = function(particle_parent){
-    var particle = particle_parent.par ;
+  this.process_particle = function(particle){
     // Propagate particle through detector
     var x = particle.r_0.x ;
     var y = particle.r_0.y ;
     var z = particle.r_0.z ;
+    //alert(particle.pdgId + ' ' + x + ',' + y + ',' + z) ;
+    //if(particle.pdgId==310) alert('K0: ' + particle.r_decay.x + ' ' + particle.r_decay.y + ' ' + particle.r_decay.z) ;
     
     // Convert everything to MKS
     var B = B_field ;
     var e = 1.6e-19 ;
     var c = 3e8 ;
-    var m = particle.m/(1e6*c*c) ;
+    var c2 = c*c ;
+    var m = particle.m*e*1e6/(c*c) ;
+    var E = particle.p4_0.E()*e*1e6 ;
     var g = particle.p4_0.g() ;
     var q = particle.q*e ;
-    var px = particle.p4_0.px()/(1e6*c) ;
-    var py = particle.p4_0.py()/(1e6*c) ;
-    var pz = particle.p4_0.pz()/(1e6*c) ;
+    var px = particle.p4_0.px()*e*1e6/c ;
+    var py = particle.p4_0.py()*e*1e6/c ;
+    var pz = particle.p4_0.pz()*e*1e6/c ;
+    var p  = Math.sqrt(px*px+py*py+pz*pz) ;
+    var charged = Math.abs(particle.q)>0.5 ;
     
-    var vx = px/(m*g) ;
-    var vy = py/(m*g) ;
-    var vz = pz/(m*g) ;
+    var vx = c*c*px/E ;
+    var vy = c*c*py/E ;
+    var vz = c*c*pz/E ;
     var v = Math.sqrt(vx*vx+vy*vy+vz*vz) ;
-    //alert(1-v/c) ;
+    var v2 = vx*vx+vy*vy+vz*vz ;
+    var g2 = v2/c2 ;
     
     var points = [] ;
-    var dt = 1e-10 ;
+    var dt = 1e-9 ;
     
     // Make a path through the detector
     points.push([x,y,z]) ;
@@ -60,8 +66,19 @@ function detector_object(){
     var stopping_power = 1.0 ;
     var cl = this.critical_layers[0] ;
     var com = null ;
-    for(var i=0 ; i<1000 ; i++){
+    var r2_decay = 1e3 ;
+    if(particle.r_decay) r2_decay = particle.r_decay.x*particle.r_decay.x + particle.r_decay.y*particle.r_decay.y ;
+    for(var i=0 ; i<10000 ; i++){
+      if(particle.r_decay && particle.q==0){
+        points.push([particle.r_decay.x,particle.r_decay.y,particle.r_decay.z]) ;
+        break ;
+      }
       var r2 = x*x + y*y ;
+      if(r2>r2_decay){
+        points.pop() ;
+        points.push(particle.r_decay.x,particle.r_decay.y,particle.r_decay.z) ;
+        break ;
+      }
       if(Math.abs(z)>this.critical_z) break ;
       if(r2>cl[0]){
         cl = this.critical_layers[critical_layer_index]
@@ -69,7 +86,7 @@ function detector_object(){
         else if(cl[2]=='in'){ com = cl[1] ; }
         else{ com = null ; }
         if(com){
-          stopping_power = com.stopping_powers[particle_parent.name] ;
+          stopping_power = com.stopping_powers[particle.type] ;
         }
         else{
           stopping_power = 1.0 ;
@@ -78,17 +95,21 @@ function detector_object(){
       }
            
       // Magnetic field
-      if(r2>B_r2) B = 0 ;
-      vx += dt*q*vy*B/m ;
-      vy -= dt*q*vx*B/m ;
+      if(r2>B_r2) B = -0.0*B_field ;
+      var k = q*B/(m*g*c) ;
+      vx += (charged) ?  k*vy : 0 ;
+      vy += (charged) ? -k*vx : 0 ;
       
       // Stopping power
       vx *= stopping_power ;
       vy *= stopping_power ;
       vz *= stopping_power ;
+      v2 = vx*vx+vy*vy+vz*vz ;
+      //g = 1/Math.sqrt(1-v2/c2) ;
       x += vx*dt ;
       y += vy*dt ;
       z += vz*dt ;
+      
       points.push([x,y,z]) ;
     }
     particle.path = points ;
