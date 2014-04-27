@@ -66,17 +66,19 @@ function detector_object(){
     var stopping_power = 1.0 ;
     var cl = this.critical_layers[0] ;
     var com = null ;
-    var r2_decay = 1e3 ;
+    var r2_decay = 1e6 ;
     if(particle.r_decay) r2_decay = particle.r_decay.x*particle.r_decay.x + particle.r_decay.y*particle.r_decay.y ;
-    for(var i=0 ; i<10000 ; i++){
+    for(var i=0 ; i<100 ; i++){
       if(particle.r_decay && particle.q==0){
         points.push([particle.r_decay.x,particle.r_decay.y,particle.r_decay.z]) ;
         break ;
       }
       var r2 = x*x + y*y ;
       if(r2>r2_decay){
-        points.pop() ;
-        points.push(particle.r_decay.x,particle.r_decay.y,particle.r_decay.z) ;
+        if(particle.r_decay){
+          points.pop() ;
+          points.push(particle.r_decay.x,particle.r_decay.y,particle.r_decay.z) ;
+        }
         break ;
       }
       if(Math.abs(z)>this.critical_z) break ;

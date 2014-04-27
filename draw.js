@@ -134,6 +134,7 @@ function draw_all(particles, mode){
     var canvas  = Get('canvas_detector_'+n) ;
     draw_polygons(r0s[n], t0s[n], p0s[n], particles, canvas, modes[n], n, phi_cuts[n], scales[n]) ;
   }
+  histogram.draw(ps, '') ;
 }
 
 function polygon_object(rgb){

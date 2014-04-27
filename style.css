@@ -29,3 +29,7 @@ td.particle_color{
   padding : 0px ;
   padding-left : 0.5em ;
 }
+canvas{
+  border : 1px solid black ;
+  margin : auto ;
+}

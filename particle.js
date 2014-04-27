@@ -1,12 +1,13 @@
 //Colors
 var generic_color  = '255,255,255' ;
 var kaon_color     = '255,  0,255' ;
-var pion_color     = '255,100,255' ;
+var pion_color     = '150,150,  0' ;
 var photon_color   = '255,100,100' ;
 var electron_color = '  0,255,255' ;
 var muon_color     = '  0,255,  0' ;
+var neutrino_color = '  0,  0,  0' ;
 
-function particle_object(m, q, r0){
+function particle_object(m, q, r0, unstable){
   // Intrinsic properties
   this.q = q ;
   this.m = m ;
@@ -14,6 +15,8 @@ function particle_object(m, q, r0){
   // r and p values
   this.r_0  = make_point(r0[0],r0[1],r0[2]) ;
   this.p4_0 = new fourVector() ;
+  
+  if(unstable){ this.r_decay = make_point(r0[0],r0[1],r0[2]) ; }
   
   var phi_theta = random_phi_theta() ;
   var phi   = phi_theta[0] ;
@@ -59,16 +62,21 @@ function particle_object(m, q, r0){
         break ;
       }
     }
+    if(this.matter==-1){
+      for(var i=0 ; i<pdgIds.length ; i++){
+        pdgIds[i] *= -1 ;
+      }
+    }
     return pdgIds ;
   }
   this.decay_top_level = function(m){
     this.daughters = [] ;
-    this.decay_recurisive(m) ;
+    this.decay_recursive(m) ;
     this.post_decay_V0() ;
     return this.daughters ;
   }
-  this.decay_recurisive = function(m){
-    //if(this.pdgId==310) alert(this.decays) ;
+  this.decay_recursive = function(m){
+    if(this.daughters.length>0) return [] ; // For some reason it sometimes tries to decay particles twice
     if(this.decays.length==0) return [] ;
     var pdgIds = this.choose_random_decay() ;
     if(pdgIds==null) return ;
@@ -80,9 +88,9 @@ function particle_object(m, q, r0){
         this.daughters.push(particle) ;
       }
     }
-    this.daughters = multibody_decay(this.p4_0, this.daughters) ;
+    this.daughters = multibody_decay(this.pdgId, this.p4_0, this.daughters) ;
     for(var i=0 ; i<this.daughters.length ; i++){
-      this.daughters = this.daughters.concat(this.daughters[i].decay_recurisive()) ;
+      this.daughters = this.daughters.concat(this.daughters[i].decay_recursive(this.daughters[i].m)) ;
     }
     return this.daughters ;
   }
@@ -116,9 +124,34 @@ function particle_object(m, q, r0){
       this.daughters[i].recursively_displace(dx, dy, dz) ;
     }
   }
+  this.normalise_decays = function(){
+    if(this.decays.length==0) return ;
+    var total = 0 ;
+    for(var i=0 ; i<this.decays.length ; i++){
+      total += this.decays[i][0] ;
+    }
+    for(var i=0 ; i<this.decays.length ; i++){
+      this.decays[i][0] /= total ;
+    }
+  }
+  this.reconstruct = function(){
+    
+  }
 }
 
-function multibody_decay(p4, daughters){
+function multibody_decay(pdgId, p4, daughters){
+  var string = pdgId + ' : ' ;
+  for(var i=0 ; i<daughters.length ; i++){
+    string = string + ' ' + daughters[i].pdgId ;
+  }
+  //Get('pre_info').innerHTML += '\n' + string ;
+
+  var kstar = false ;
+  if(daughters.length==2){
+    if(Math.abs(daughters[0].pdgId*daughters[1].pdgId)==321*211){
+      kstar = true ;
+    }
+  }
   if(daughters.length==0) return [] ;
   if(daughters.length==1){
     var m2 = daughters[0].p4_0.m2() ;
@@ -163,11 +196,17 @@ function multibody_decay(p4, daughters){
   var Ebar = Math.sqrt(mu*mu+p*p) ;
   
   var p4_out = new fourVector() ;
+  
+  //alert('p3 = ' + p3[0] + ',' + p3[1] + ',' + p3[2]) ;
+  //alert(string) ;
+  //alert(p + ' ' + pmax + ' ' + m + ' ' + mi + ' ' + mbar) ;
+  //p4.alert() ;
+  
   p4_out.x = -p3[0] ;
   p4_out.y = -p3[1] ;
   p4_out.z = -p3[2] ;
   p4_out.t = Math.sqrt(mu*mu+p*p) ;
-  daughters = multibody_decay(p4_out, daughters) ;
+  daughters = multibody_decay(-1, p4_out, daughters) ;
   daughters.push(d) ;
   
   var px = 0 ;
@@ -192,6 +231,10 @@ function make_particle(pdgId, r0){
     case  -11: return new electron_object( 1, r0) ; break ;
     case   13: return new     muon_object(-1, r0) ; break ;
     case  -13: return new     muon_object( 1, r0) ; break ;
+    case   15: return new      tau_object(-1, r0) ; break ;
+    case  -15: return new      tau_object( 1, r0) ; break ;
+    case   19: return new       nu_object(-1, r0) ; break ;
+    case  -19: return new       nu_object( 1, r0) ; break ;
     
     // Bosons
     case   22: return new   photon_object(    r0) ; break ;
@@ -203,10 +246,15 @@ function make_particle(pdgId, r0){
     case  113: return new     rho0_object(    r0) ; break ;
     
     // Kaons
-    case  321: return new        K_object(-1, r0) ; break ;
-    case -321: return new        K_object( 1, r0) ; break ;
+    case  321: return new        K_object( 1, r0) ; break ;
+    case -321: return new        K_object(-1, r0) ; break ;
     case  310: return new       KS_object(    r0) ; break ;
     case  130: return new       KL_object(    r0) ; break ;
+    
+    case  323: return new     K892_object(-1, r0) ; break ;
+    case -323: return new     K892_object(-1, r0) ; break ;
+    case  313: return new   K892_0_object( 1, r0) ; break ;
+    case -313: return new   K892_0_object(-1, r0) ; break ;
     
     // Charmed mesons
     case  421: return new       D0_object( 1, r0) ; break ;
@@ -218,161 +266,6 @@ function make_particle(pdgId, r0){
     case  443: return new     JPsi_object(    r0) ; break ;
     default : return null ; break ;
   }
-}
-
-function KS_object(r0){
-  var par = new particle_object(497.6, 0, r0) ;
-  par.color = kaon_color ;
-  par.type = 'neutral_hadron' ;
-  par.w = 1e-20 ;
-  par.tau = 8.95e-11 ;
-  par.pdgId = 310 ;
-  par.decays = [
-    [1.0,[211,-211]]
-  ] ;
-  return par ;
-}
-
-function KL_object(r0){
-  var par = new particle_object(497.6, 0, r0) ;
-  par.color = kaon_color ;
-  par.type = 'neutral_hadron' ;
-  par.w = 1e-20 ;
-  par.tau = 5.12e-8 ;
-  par.pdgId = 130 ;
-  par.decays = [
-    [1.0,[211,-211,111]]
-  ] ;
-  return par ;
-}
-
-function K_object(q, r0){
-  var par = new particle_object(494.7, q, r0) ;
-  par.color = kaon_color ;
-  par.type = 'charged_hadron' ;
-  par.w = 1e-20 ;
-  par.pdgId = (q==1) ? -321 : 321 ;
-  par.decays = [] ;
-  return par;
-}
-
-function D0_object(q, r0){
-  var par = new particle_object(1865, 0, r0) ;
-  par.color = generic_color ;
-  par.type = 'neutral_hadron' ;
-  par.w = 1e-20 ;
-  par.pdgId = (q==1) ? 421 : -421 ;
-  par.decays = [ 
-    [1.5, [321,-211]]
-  ] ;
-  return par ;
-}
-
-function D_object(q, r0){
-  var par = new particle_object(1869, q, r0) ;
-  par.color = generic_color ;
-  par.type = 'charged_hadron' ;
-  par.w = 1e-20 ;
-  par.pdgId = (q==1) ? 411 : -411 ;
-  par.decays = [ 
-    [1.5, [310,211]] ,
-    [0.5, [321,-211,211]] ,
-    [0.5, [321,-211,211,111]]
-  ] ;
-  return par ;
-}
-
-function photon_object(r0){
-  var par = new particle_object(0, 0, r0) ;
-  par.color = photon_color ;
-  par.type = 'photon' ;
-  par.w = 0 ;
-  par.pdgId = 22 ;
-  par.decays = [] ;
-  return par ;
-}
-
-function pi_object(q, r0){
-  var par = new particle_object(139.6, q, r0) ;
-  par.color = pion_color ;
-  par.type = 'charged_hadron' ;
-  par.w = 1e-20 ;
-  par.pdgId = (q==1) ? 211 : -211 ;
-  par.decays = [] ;
-  return par ;
-}
-
-function pi0_object(r0){
-  var par = new particle_object(135.0, 0, r0) ;
-  par.color = generic_color ;
-  par.type = 'neutral_hadron' ;
-  par.w = 1e-20 ;
-  par.pdgId = 111 ;
-  par.decays = [
-    //[1.01, [11,-11,22]] ,
-    [0.99, [22,22]    ] ,
-    [0.01, [11,-11,22]]
-  ] ;
-  return par ;
-}
-
-function rho0_object(r0){
-  var par = new particle_object(770.0, 0, r0) ;
-  par.color = generic_color ;
-  par.type = 'neutral_hadron' ;
-  par.w = 150.0 ;
-  par.pdgId = 113 ;
-  par.decays = [
-    [1.5, [211,-211]]
-  ] ;
-  return par ;
-}
-
-function electron_object(q, r0){
-  var par = new particle_object(0.511, q, r0) ;
-  par.color = electron_color ;
-  par.type = 'electron' ;
-  par.w = 1e-20 ;
-  par.pdgId = (q==1) ? -11 : 11 ;
-  par.decays = [] ;
-  return par ;
-}
-
-function muon_object(q, r0){
-  var par = new particle_object(105.7, q, r0) ;
-  par.color = muon_color ;
-  par.type = 'muon' ;
-  par.w = 1e-20 ;
-  par.pdgId = (q==1) ? -13 : 13 ;
-  par.decays = [] ;
-  return par ;
-}
-
-function Jpsi_object(r0){
-  var par = new particle_object(3097, 0, r0) ;
-  par.color = generic_color ;
-  par.type = 'ephemeral_hadron' ;
-  par.m0 = 3097 ;
-  par.w  = 0.093 ;
-  par.y0 = cauchy(this.m, this.m, this.w) ;
-  par.pdgId = 443 ;
-  par.make_random_masses = function(n, lower, upper){
-    this.masses = [] ;
-    var counter = 0 ;
-    var y_max = cauchy(this.m, this.m, this.w) ;
-    while(counter<n){
-      var m = inverse_cauchy(Math.random()/(Math.PI*this.w), this.m, this.w) ;
-      if(!isNaN(m)){
-        counter++ ;
-        this.masses.push(m) ;
-      }
-    }
-  }
-  par.decays = [
-    [0.5, [11,-11]] ,
-    [0.5, [13,-13]]
-  ] ;
-  return par ;
 }
 
 function random_boost(b){
@@ -388,47 +281,6 @@ function random_boost(b){
   p4.t = E ;
   var boost = p4.boostVector() ;
   return boost ;
-}
-
-function ZBoson_object(){
-  this.m  = 91.2e0 ;
-  this.w  = 2.5e0 ;
-  this.y0 = cauchy(this.m, this.m, this.w) ;
-  this.make_random_masses = function(n, lower, upper){
-    this.masses = [] ;
-    var counter = 0 ;
-    var y_max = cauchy(this.m, this.m, this.w) ;
-    while(counter<n){
-      var m = inverse_cauchy(Math.random()/(Math.PI*this.w), this.m, this.w) ;
-      if(!isNaN(m)){
-        counter++ ;
-        this.masses.push(m) ;
-      }
-    }
-  }
-  this.make_ll_pair = function(m){
-    var l_plus  = null ;
-    var l_minus = null ;
-    if(Math.random()<0.5){
-      l_plus  = new electron_object( 1) ;
-      l_minus = new electron_object(-1) ;
-    }
-    else{
-      l_plus  = new muon_object( 1) ;
-      l_minus = new muon_object(-1) ;
-    }
-    var p = momentum_two_body_decay(m, l_plus.m, l_minus.m) ;
-    var pxyz = random_threeVector(p) ;
-    l_plus.p4_0.x = pxyz[0] ; l_minus.p4_0.x = -pxyz[0] ;
-    l_plus.p4_0.y = pxyz[1] ; l_minus.p4_0.y = -pxyz[1] ;
-    l_plus.p4_0.z = pxyz[2] ; l_minus.p4_0.z = -pxyz[2] ;
-    
-    var beta = 0.9*Math.random() ;
-    var boost = random_boost(beta) ;
-    l_plus.p4_0  = l_plus.par .p4_0.boost(boost) ;
-    l_minus.p4_0 = l_minus.p4_0.boost(boost) ;
-    return [l_plus,l_minus] ;
-  }
 }
 
 function cauchy(x, m, w){

@@ -29,6 +29,8 @@ function tracker_object(name, ri, ro, zl, nl, n_seg, rgb_plane, rgb_line){
   this.stopping_powers['electron'        ] = 0.99  ;
   this.stopping_powers['photon'          ] = 0.995 ;
   this.stopping_powers['muon'            ] = 0.99  ;
+  this.stopping_powers['tau'             ] = 0.99  ;
+  this.stopping_powers['neutrino'        ] = 1.0  ;
   this.stopping_powers['ephemeral_hadron'] = 1.0   ;
   this.stopping_powers['charged_hadron'  ] = 0.99  ;
   this.stopping_powers['neutral_hadron'  ] = 0.99  ;
