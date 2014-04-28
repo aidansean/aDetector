@@ -19,13 +19,13 @@ input#input_x, input#input_y, input#input_z, input#input_t, input#input_p{
 
 th.particle_color{
   width : 30px ;
-  height : 20px ;
+  height : 10px ;
   background : white ;
   border : 1px solid black ;
 }
 td.particle_color{
-  width : 280px ;
-  font: 20px arial , sans-serif ;
+  width : 180px ;
+  font: 12px arial , sans-serif ;
   padding : 0px ;
   padding-left : 0.5em ;
 }

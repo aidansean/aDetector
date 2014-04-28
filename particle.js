@@ -76,10 +76,10 @@ function particle_object(m, q, r0, unstable){
     return this.daughters ;
   }
   this.decay_recursive = function(m){
-    if(this.daughters.length>0) return [] ; // For some reason it sometimes tries to decay particles twice
+    //if(this.daughters.length>0) this.daughters = [] ; //return [] ; // For some reason it sometimes tries to decay particles twice
     if(this.decays.length==0) return [] ;
     var pdgIds = this.choose_random_decay() ;
-    if(pdgIds==null) return ;
+    if(pdgIds==null) return [] ;
     for(var i=0 ; i<pdgIds.length ; i++){
       var r0 = this.r_0 ;
       var particle = make_particle(pdgIds[i], [r0.x, r0.y, r0.z]) ;
@@ -88,9 +88,12 @@ function particle_object(m, q, r0, unstable){
         this.daughters.push(particle) ;
       }
     }
-    this.daughters = multibody_decay(this.pdgId, this.p4_0, this.daughters) ;
+    this.daughters = multibody_decay(this.pdgId, this.p4_0, this.daughters, 0) ;
+    
+    // This bit needs sorting into a heirachy
     for(var i=0 ; i<this.daughters.length ; i++){
-      this.daughters = this.daughters.concat(this.daughters[i].decay_recursive(this.daughters[i].m)) ;
+      //this.daughters = this.daughters.concat(this.daughters[i].decay_recursive(this.daughters[i].m)) ;
+      this.daughters[i].decay_recursive(this.daughters[i].m) ;
     }
     return this.daughters ;
   }
@@ -139,20 +142,26 @@ function particle_object(m, q, r0, unstable){
   }
 }
 
-function multibody_decay(pdgId, p4, daughters){
-  var string = pdgId + ' : ' ;
+function multibody_decay(pdgId, p4, daughters, depth){
+  if(daughters.length==0) return [] ;
+  
+  // Format string to show what's going on
+  var n_padding = 5 ;
+  n_padding -= pdgId.length ;
+  var padding = '' ;
+  for(var i=0 ; i<n_padding ; i++){
+    padding += ' ' ;
+  }
+  var prefix = '' ;
+  for(var i=0 ; i<depth ; i++){
+    prefix = prefix + '  ' ;
+  }
+  var string = padding + pdgId + ' : ' + prefix ;
   for(var i=0 ; i<daughters.length ; i++){
     string = string + ' ' + daughters[i].pdgId ;
   }
-  //Get('pre_info').innerHTML += '\n' + string ;
-
-  var kstar = false ;
-  if(daughters.length==2){
-    if(Math.abs(daughters[0].pdgId*daughters[1].pdgId)==321*211){
-      kstar = true ;
-    }
-  }
-  if(daughters.length==0) return [] ;
+  Get('pre_info').innerHTML += '\n' + string ;
+  
   if(daughters.length==1){
     var m2 = daughters[0].p4_0.m2() ;
     var p2 = p4.x*p4.x+p4.y*p4.y+p4.z*p4.z ;
@@ -163,18 +172,14 @@ function multibody_decay(pdgId, p4, daughters){
     daughters[0].p4_0.t = E ;
     return daughters ;
   }
-
+  
   // Sort daughters randomly
   var daughters_with_indices = [] ;
-  for(var i=0 ; i<daughters.length ; i++){
-    daughters_with_indices.push([Math.random(),daughters[i]]) ;
-  }
+  for(var i=0 ; i<daughters.length ; i++){ daughters_with_indices.push([Math.random(),daughters[i]]) ; }
   daughters_with_indices.sort(function(a,b){ return a[0] < b[0] ; }) ;
-  var bv = p4.boostVector() ;
-  for(var i=0 ; i<daughters.length ; i++){
-    daughters[i] = daughters_with_indices[i][1] ;
-  }
+  for(var i=0 ; i<daughters.length ; i++){ daughters[i] = daughters_with_indices[i][1] ; }
   
+  var bv = p4.boostVector() ;
   var m = p4.m() ;
   var d = daughters.pop() ;
   
@@ -196,17 +201,17 @@ function multibody_decay(pdgId, p4, daughters){
   var Ebar = Math.sqrt(mu*mu+p*p) ;
   
   var p4_out = new fourVector() ;
+  p4_out.x = -p3[0] ;
+  p4_out.y = -p3[1] ;
+  p4_out.z = -p3[2] ;
+  p4_out.t = Math.sqrt(mu*mu+p*p) ;
   
   //alert('p3 = ' + p3[0] + ',' + p3[1] + ',' + p3[2]) ;
   //alert(string) ;
   //alert(p + ' ' + pmax + ' ' + m + ' ' + mi + ' ' + mbar) ;
   //p4.alert() ;
   
-  p4_out.x = -p3[0] ;
-  p4_out.y = -p3[1] ;
-  p4_out.z = -p3[2] ;
-  p4_out.t = Math.sqrt(mu*mu+p*p) ;
-  daughters = multibody_decay(-1, p4_out, daughters) ;
+  daughters = multibody_decay(-1, p4_out, daughters, depth+1) ;
   daughters.push(d) ;
   
   var px = 0 ;
@@ -237,6 +242,7 @@ function make_particle(pdgId, r0){
     case  -19: return new       nu_object( 1, r0) ; break ;
     
     // Bosons
+    case  -22:
     case   22: return new   photon_object(    r0) ; break ;
     
     // Light mesons
@@ -244,11 +250,15 @@ function make_particle(pdgId, r0){
     case -211: return new       pi_object(-1, r0) ; break ;
     case  111: return new      pi0_object(    r0) ; break ;
     case  113: return new     rho0_object(    r0) ; break ;
+    case  213: return new      rho_object( 1, r0) ; break ;
+    case -213: return new      rho_object(-1, r0) ; break ;
     
     // Kaons
     case  321: return new        K_object( 1, r0) ; break ;
     case -321: return new        K_object(-1, r0) ; break ;
+    case -310:
     case  310: return new       KS_object(    r0) ; break ;
+    case -130:
     case  130: return new       KL_object(    r0) ; break ;
     
     case  323: return new     K892_object(-1, r0) ; break ;
@@ -263,6 +273,7 @@ function make_particle(pdgId, r0){
     case -411: return new        D_object(-1, r0) ; break ;
     
     // Charmonium
+    case -443:
     case  443: return new     JPsi_object(    r0) ; break ;
     default : return null ; break ;
   }
