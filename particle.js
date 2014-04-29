@@ -1,12 +1,3 @@
-//Colors
-var generic_color  = '255,255,255' ;
-var kaon_color     = '255,  0,255' ;
-var pion_color     = '150,150,  0' ;
-var photon_color   = '255,100,100' ;
-var electron_color = '  0,255,255' ;
-var muon_color     = '  0,255,  0' ;
-var neutrino_color = '  0,  0,  0' ;
-
 function particle_object(m, q, r0, unstable){
   // Intrinsic properties
   this.q = q ;
@@ -101,31 +92,7 @@ function particle_object(m, q, r0, unstable){
   this.post_decay_V0 = function(){
     // Recursively go through daughters, look for KS, KL, and Lambda particles
     // Then change their r0 values to take non-zero flight length into account
-    for(var i=0 ; i<this.daughters.length ; i++){
-      var d = this.daughters[i] ;
-      var success = false ;
-      if(d.pdgId== 310) success = true ;
-      if(d.pdgId== 130) success = true ;
-      if(d.pdgId==3122) success = true ;
-        
-      var dt = (success)? -d.tau*Math.log(Math.random()) : 0 ;
-      var bg = d.p4_0.bg() ;
-      var c  = 3e8 ;
-      var dr = bg*c*dt ;
-      var dx = dr*d.p4_0.x/d.p4_0.r() ;
-      var dy = dr*d.p4_0.y/d.p4_0.r() ;
-      var dz = dr*d.p4_0.z/d.p4_0.r() ;
-      if(success) d.r_decay = make_point(d.r_0.x+dx, d.r_0.y+dy, d.r_0.z+dz) ;
-      d.recursively_displace(dx, dy, dz) ;
-    }
-  }
-  this.recursively_displace = function(dx, dy, dz){
-    for(var i=0 ; i<this.daughters.length ; i++){
-      this.daughters[i].r_0.x += dx ;
-      this.daughters[i].r_0.y += dy ;
-      this.daughters[i].r_0.z += dz ;
-      this.daughters[i].recursively_displace(dx, dy, dz) ;
-    }
+    recursively_displace(this, 0, 0, 0) ;
   }
   this.normalise_decays = function(){
     if(this.decays.length==0) return ;
@@ -139,6 +106,35 @@ function particle_object(m, q, r0, unstable){
   }
   this.reconstruct = function(){
     
+  }
+}
+
+function recursively_displace(particle, dx, dy, dz){
+    for(var i=0 ; i<particle.daughters.length ; i++){
+      var d = particle.daughters[i] ;
+      d.r_0.x += dx ;
+      d.r_0.y += dy ;
+      d.r_0.z += dz ;
+      
+      var success = false ;
+      var pdgId = Math.abs(d.pdgId) ;
+      if(pdgId==  15) success = true ;
+      if(pdgId== 310) success = true ;
+      if(pdgId== 130) success = true ;
+      if(pdgId==3122) success = true ;
+      
+      if(success){
+        var rand = Math.random() ;
+        var dt = (success) ? -d.tau*Math.log(rand) : 0 ;
+        var bg = d.p4_0.bg() ;
+        var c  = 3e8 ;
+        var dr = bg*c*dt ;
+        var dx = dr*d.p4_0.x/d.p4_0.r() ;
+        var dy = dr*d.p4_0.y/d.p4_0.r() ;
+        var dz = dr*d.p4_0.z/d.p4_0.r() ;
+        d.r_decay = make_point(d.r_0.x+dx, d.r_0.y+dy, d.r_0.z+dz) ;
+      }
+      recursively_displace(d, dx, dy, dz) ;
   }
 }
 
@@ -160,7 +156,7 @@ function multibody_decay(pdgId, p4, daughters, depth){
   for(var i=0 ; i<daughters.length ; i++){
     string = string + ' ' + daughters[i].pdgId ;
   }
-  Get('pre_info').innerHTML += '\n' + string ;
+  //Get('pre_info').innerHTML += '\n' + string ;
   
   if(daughters.length==1){
     var m2 = daughters[0].p4_0.m2() ;
@@ -189,6 +185,7 @@ function multibody_decay(pdgId, p4, daughters, depth){
   var mi = d.p4_0.m() ;
   var pmax = momentum_two_body_decay(m, mi, mbar) ;
   var p = (daughters.length==1) ? pmax : 0.9*Math.random()*pmax ;
+  //if(daughters.length==1) alert(m + ' ' + mi + ' ' + mbar + ' ' + pmax) ;
   
   // Make the three vectors and boost the first daughter in one direction, and the rest in the other
   var p3 = random_threeVector(p) ;
@@ -206,11 +203,6 @@ function multibody_decay(pdgId, p4, daughters, depth){
   p4_out.z = -p3[2] ;
   p4_out.t = Math.sqrt(mu*mu+p*p) ;
   
-  //alert('p3 = ' + p3[0] + ',' + p3[1] + ',' + p3[2]) ;
-  //alert(string) ;
-  //alert(p + ' ' + pmax + ' ' + m + ' ' + mi + ' ' + mbar) ;
-  //p4.alert() ;
-  
   daughters = multibody_decay(-1, p4_out, daughters, depth+1) ;
   daughters.push(d) ;
   
@@ -225,58 +217,18 @@ function multibody_decay(pdgId, p4, daughters, depth){
     pz += daughters[i].p4_0.z ;
     E  += daughters[i].p4_0.t ;
   }
-  var m = Math.sqrt(E*E-px*px-py*py-pz*pz) ;
   return daughters ;
 }
 
-function make_particle(pdgId, r0){
-  switch(pdgId){
-    // Leptons
-    case   11: return new electron_object(-1, r0) ; break ;
-    case  -11: return new electron_object( 1, r0) ; break ;
-    case   13: return new     muon_object(-1, r0) ; break ;
-    case  -13: return new     muon_object( 1, r0) ; break ;
-    case   15: return new      tau_object(-1, r0) ; break ;
-    case  -15: return new      tau_object( 1, r0) ; break ;
-    case   19: return new       nu_object(-1, r0) ; break ;
-    case  -19: return new       nu_object( 1, r0) ; break ;
-    
-    // Bosons
-    case  -22:
-    case   22: return new   photon_object(    r0) ; break ;
-    
-    // Light mesons
-    case  211: return new       pi_object( 1, r0) ; break ;
-    case -211: return new       pi_object(-1, r0) ; break ;
-    case  111: return new      pi0_object(    r0) ; break ;
-    case  113: return new     rho0_object(    r0) ; break ;
-    case  213: return new      rho_object( 1, r0) ; break ;
-    case -213: return new      rho_object(-1, r0) ; break ;
-    
-    // Kaons
-    case  321: return new        K_object( 1, r0) ; break ;
-    case -321: return new        K_object(-1, r0) ; break ;
-    case -310:
-    case  310: return new       KS_object(    r0) ; break ;
-    case -130:
-    case  130: return new       KL_object(    r0) ; break ;
-    
-    case  323: return new     K892_object(-1, r0) ; break ;
-    case -323: return new     K892_object(-1, r0) ; break ;
-    case  313: return new   K892_0_object( 1, r0) ; break ;
-    case -313: return new   K892_0_object(-1, r0) ; break ;
-    
-    // Charmed mesons
-    case  421: return new       D0_object( 1, r0) ; break ;
-    case -421: return new       D0_object(-1, r0) ; break ;
-    case  411: return new        D_object( 1, r0) ; break ;
-    case -411: return new        D_object(-1, r0) ; break ;
-    
-    // Charmonium
-    case -443:
-    case  443: return new     JPsi_object(    r0) ; break ;
-    default : return null ; break ;
+function m_from_particles(particles){
+  var p4 = new fourVector() ;
+  for(var i=0 ; i<particles.length ; i++){
+    p4.x += particles.p4_0.x ;
+    p4.y += particles.p4_0.y ;
+    p4.z += particles.p4_0.z ;
+    p4.t += particles.p4_0.t ;
   }
+  return p4.m() ;
 }
 
 function random_boost(b){

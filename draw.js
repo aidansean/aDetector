@@ -1,4 +1,11 @@
-function draw_polygons(r0, t0, p0, particles, canvas, mode, image_name, phi_cut, scale){
+function draw_polygons(settings, particles, canvas, image_name){
+  var r0 = settings.r0 ;
+  var t0 = settings.t0 ;
+  var p0 = settings.p0 ;
+  var mode = settings.mode ;
+  var phi_cut = settings.phi_cut ;
+  var scale = settings.scale ;
+
   var context = canvas.getContext('2d') ;
   var cw = canvas.width  ;
   var ch = canvas.height ;
@@ -34,8 +41,6 @@ function draw_polygons(r0, t0, p0, particles, canvas, mode, image_name, phi_cut,
     }
   }
   
-  var centroid_z_min =  1e6 ;
-  var centroid_z_max = -1e6 ;
   var shapes = [ polygons , lines , particle_polygons ] ;
   for(var i=0 ; i<shapes.length ; i++){
     for(var j=0 ; j<shapes[i].length ; j++){
@@ -44,11 +49,8 @@ function draw_polygons(r0, t0, p0, particles, canvas, mode, image_name, phi_cut,
         pol.points[k] = pol.raw_points[k].add(r0,-1) ;
         pol.points[k] = rotate_theta_phi(pol.points[k], t0, p0) ;
       }
-      var centroid = get_centroid(pol.points) ;
-      if(centroid.z<centroid_z_min) centroid_z_min = centroid[2] ;
-      if(centroid.z>centroid_z_max) centroid_z_max = centroid[2] ;
     }
-    shapes[i].sort( function(a, b){ return get_centroid(a.raw_points)[0] < get_centroid(b.raw_points)[0] ; }) ;
+    shapes[i].sort( function(a, b){ return get_centroid(b.raw_points)[0] - get_centroid(a.raw_points)[0] ; } ) ;
   }
   
   var cw = context.canvas.width  ;
@@ -62,8 +64,6 @@ function draw_polygons(r0, t0, p0, particles, canvas, mode, image_name, phi_cut,
       var phi = 180*Math.atan2(get_centroid(pol.raw_points)[1], get_centroid(pol.raw_points)[0])/Math.PI ;
       if(Math.abs(phi)>phi_cut && pol.type!='particle') continue ;
       
-      //var centroid = get_centroid(pol.points) ;
-      //var opacity = (centroid[2]<0) ? 0 : -0.25*Math.log(centroid[2]/(1.0*centroid_z_max),2) ;
       context.beginPath() ;
       var opacity = (pol.hot==true) ? 1.0 : 0.5 ;
       context.fillStyle   = 'rgba('+pol.rgb+','+opacity+')' ;
@@ -97,44 +97,30 @@ function draw_polygons(r0, t0, p0, particles, canvas, mode, image_name, phi_cut,
   }
 }
 
-function draw_all(particles, mode){
-  var r0s = [] ;
-  r0s['cutaway'     ] = r0 ;
-  r0s['transverse'  ] = make_point(0,0,-5) ;
-  r0s['longitudinal'] = make_point(-5,0,0) ;
-  
-  var t0s = [] ;
-  t0s['cutaway'     ] = t0 ;
-  t0s['transverse'  ] =  0 ;
-  t0s['longitudinal'] = 0.5*Math.PI ;
-  
-  var p0s = [] ;
-  p0s['cutaway'     ] = p0 ;
-  p0s['transverse'  ] =  0 ;
-  p0s['longitudinal'] =  0 ;
-  
-  var modes = [] ;
-  modes['cutaway'     ] = 'normal' ;
-  modes['transverse'  ] = 'flat' ;
-  modes['longitudinal'] = 'flat' ;
-  
-  var phi_cuts = [] ;
-  phi_cuts['cutaway'     ] = 121 ;
-  phi_cuts['transverse'  ] = 400 ;
-  phi_cuts['longitudinal'] =  91 ;
-  
-  var scales = [] ;
-  scales['cutaway'     ] = 1 ;
-  scales['transverse'  ] = 3 ;
-  scales['longitudinal'] = 4 ;
+function draw_settings_object(r0, t0, p0, mode, phi_cut, scale){
+  this.r0 = r0 ;
+  this.t0 = t0 ;
+  this.p0 = p0 ;
+  this.mode = mode ;
+  this.phi_cut = phi_cut ;
+  this.scale = scale ;
+}
+var draw_settings = [] ;
+draw_settings['cutaway'     ] = new draw_settings_object(                r0,          t0, p0, 'normal', 121, 1) ;
+draw_settings['transverse'  ] = new draw_settings_object(make_point(0,0,-5),           0,  0,   'flat', 400, 3) ;
+draw_settings['longitudinal'] = new draw_settings_object(make_point(-5,0,0), 0.5*Math.PI,  0,   'flat',  91, 4) ;
 
+function draw_all(particles){
+  draw_detector(particles) ;
+  histogram.draw(ps, 'e') ;
+}
+
+function draw_detector(particles){
   var names = ['cutaway' , 'transverse' , 'longitudinal'] ;
   for(var i=0 ; i<names.length ; i++){
-    var n = names[i] ;
-    var canvas  = Get('canvas_detector_'+n) ;
-    draw_polygons(r0s[n], t0s[n], p0s[n], particles, canvas, modes[n], n, phi_cuts[n], scales[n]) ;
+    var canvas  = Get('canvas_detector_'+names[i]) ;
+    draw_polygons(draw_settings[names[i]], particles, canvas, names[i]) ;
   }
-  histogram.draw(ps, '') ;
 }
 
 function polygon_object(rgb){

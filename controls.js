@@ -1,0 +1,19 @@
+function keyDown(evt){
+  var keyDownID = window.event ? event.keyCode : (evt.keyCode != 0 ? evt.keyCode : evt.which) ;
+  if(keyDownID==8) evt.preventDefault ;
+  switch(keyDownID){
+    case 32:
+      evt.preventDefault() ;
+      pause = !pause ;
+  }
+}
+
+function update_coords(){
+  x0 = parseFloat(Get('input_x').value) ;
+  y0 = parseFloat(Get('input_y').value) ;
+  z0 = parseFloat(Get('input_z').value) ;
+  t0 = parseFloat(Get('input_t').value)*Math.PI/180 ;
+  p0 = parseFloat(Get('input_p').value)*Math.PI/180 ;
+  r0.x = x0 ; r0.y = y0 ; r0.z = z0 ;
+  image_canvas_detector['cutaway'] = undefined ;
+}

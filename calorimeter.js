@@ -8,6 +8,32 @@ function calorimeter_block(points, rgb_plane, rgb_line){
   this.cell.make_shapes() ;
 }
 
+function ecal_object(name, ri, ro, zl, nl, nseg, nsec, padding_xy, padding_z, rgb_plane, rgb_line){
+  var ecal = new calorimeter_object(name, ri, ro, zl, nl, nseg, nsec, padding_xy, padding_z, rgb_plane, rgb_line) ;
+  ecal.stopping_powers['electron'        ] = 0.25 ;
+  ecal.stopping_powers['photon'          ] = 0.1 ;
+  ecal.stopping_powers['muon'            ] = 0 ;
+  ecal.stopping_powers['tau'             ] = 0 ;
+  ecal.stopping_powers['ephemeral_hadron'] = 0 ;
+  ecal.stopping_powers['neutrino'        ] = 0 ;
+  ecal.stopping_powers['charged_hadron'  ] = 0 ;
+  ecal.stopping_powers['neutral_hadron'  ] = 0 ;
+  return ecal ;
+}
+
+function hcal_object(name, ri, ro, zl, nl, nseg, nsec, padding_xy, padding_z, rgb_plane, rgb_line){
+  var hcal = new calorimeter_object(name, ri, ro, zl, nl, nseg, nsec, padding_xy, padding_z, rgb_plane, rgb_line) ;
+  hcal.stopping_powers['electron'        ] = 0 ;
+  hcal.stopping_powers['photon'          ] = 0 ;
+  hcal.stopping_powers['muon'            ] = 0 ;
+  hcal.stopping_powers['tau'             ] = 0 ;
+  hcal.stopping_powers['ephemeral_hadron'] = 0 ;
+  hcal.stopping_powers['neutrino'        ] = 0 ;
+  hcal.stopping_powers['charged_hadron'  ] = 0 ;
+  hcal.stopping_powers['neutral_hadron'  ] = 0 ;
+  return hcal ;
+}
+
 function calorimeter_object(name, ri, ro, zl, nl, nseg, nsec, padding_xy, padding_z, rgb_plane, rgb_line){
   this.name = name ;
   this.rgb_plane = rgb_plane ;

@@ -1,5 +1,6 @@
 function detector_object(){
   this.components = [] ;
+  this.triggers   = [] ;
   this.find_subcomponent = function(x, y, z){
     var r2 = x*x+y*y ;
     var matches = [] ;
@@ -49,6 +50,7 @@ function detector_object(){
     var pz = particle.p4_0.pz()*e*1e6/c ;
     var p  = Math.sqrt(px*px+py*py+pz*pz) ;
     var charged = Math.abs(particle.q)>0.5 ;
+    var m2c2 = m*m*c*c ;
     
     var vx = c*c*px/E ;
     var vy = c*c*py/E ;
@@ -58,17 +60,19 @@ function detector_object(){
     var g2 = v2/c2 ;
     
     var points = [] ;
-    var dt = 1e-9 ;
+    var dt = 1e-10 ;
     
     // Make a path through the detector
     points.push([x,y,z]) ;
     var critical_layer_index = 0 ;
-    var stopping_power = 1.0 ;
+    var stopping_power = 0.0 ;
     var cl = this.critical_layers[0] ;
     var com = null ;
     var r2_decay = 1e6 ;
     if(particle.r_decay) r2_decay = particle.r_decay.x*particle.r_decay.x + particle.r_decay.y*particle.r_decay.y ;
-    for(var i=0 ; i<100 ; i++){
+    
+    // Move through detector, step by step
+    for(var i=0 ; i<1000 ; i++){
       if(particle.r_decay && particle.q==0){
         points.push([particle.r_decay.x,particle.r_decay.y,particle.r_decay.z]) ;
         break ;
@@ -91,7 +95,7 @@ function detector_object(){
           stopping_power = com.stopping_powers[particle.type] ;
         }
         else{
-          stopping_power = 1.0 ;
+          stopping_power = 0.0 ;
         }
         critical_layer_index++ ;
       }
@@ -102,12 +106,26 @@ function detector_object(){
       vx += (charged) ?  k*vy : 0 ;
       vy += (charged) ? -k*vx : 0 ;
       
-      // Stopping power
-      vx *= stopping_power ;
-      vy *= stopping_power ;
-      vz *= stopping_power ;
-      v2 = vx*vx+vy*vy+vz*vz ;
-      //g = 1/Math.sqrt(1-v2/c2) ;
+      // Stopping power calculation
+      // First reduce energy, then adjust p and v accordingly
+      if(E<5*e*1e6) break ;
+      p = Math.sqrt(E*E/c2-m2c2) ;
+      var b = p*c/E ;
+      var v = Math.sqrt(vx*vx+vy*vy+vz*vz) ;
+      var theta = Math.acos(vz/v) ;
+      var phi   = Math.atan2(vy,vx) ;
+      var pt = p*Math.sin(theta) ;
+      if(pt*c/(e*1e6)<20) break ;
+      
+      vx = c*Math.sin(theta)*Math.cos(phi) ;
+      vy = c*Math.sin(theta)*Math.sin(phi) ;
+      vz = c*Math.cos(theta) ;
+      
+      if(m>e*1e-3){
+        vx *= b ;
+        vy *= b ;
+        vz *= b ;
+      }
       x += vx*dt ;
       y += vy*dt ;
       z += vz*dt ;
