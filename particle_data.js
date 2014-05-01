@@ -47,7 +47,7 @@ function make_particle(pdgId, r0){
     
     case  311:
     case -311:
-      if(Math.random()<0.5) return new KS_object(r0) ; break ;
+      if(Math.random()<0.5){ return new KS_object(r0) ; break ; }
       return new KL_object(r0) ; break ;
     
     // Charmed mesons
@@ -59,8 +59,10 @@ function make_particle(pdgId, r0){
     case -431: return new       Ds_object(-1, r0) ; break ;
     
     // Charmonium
+    case -441:
+    case  441: return new     etaC_object(    r0) ; break ;
     case -443:
-    case  443: return new     JPsi_object(    r0) ; break ;
+    case  443: return new     Jpsi_object(    r0) ; break ;
     
     // Misc
     case 0: return new virtual_photon_object(r0, 0) ; break ;
@@ -275,7 +277,7 @@ function phi_object(r0){
     [0.013, [221,22]]
   ] ;
   par.normalise_decays() ;
-  par.m = inverse_cauchy(Math.random()/(Math.PI*par.w), par.m, par.w) ;
+  par.m = inverse_cauchy(1.2*Math.random()/(Math.PI*par.w), par.m, par.w) ;
   var  E = Math.sqrt(par.m*par.m+par.p4_0.p()*par.p4_0.p()) ;
   par.p4_0.t = E ;
   return par ;
@@ -436,11 +438,36 @@ function Ds_object(q, r0){
     [0.010, [321,310,211-211]] ,
     [0.009, [321,-321,211,-211,211]]
   ] ;
+  par.decays = [ [0.045, [333,211]] ] ;
   par.normalise_decays() ;
   return par ;
 }
 
 // Quarkonia
+function etaC_object(r0){
+  var par = new particle_object(2983, 0, r0, true) ;
+  par.color = generic_color ;
+  par.type = 'ephemeral_hadron' ;
+  par.m0 = 2983 ;
+  par.w  = 32.0 ;
+  par.matter = 0 ;
+  par.y0 = cauchy(this.m, this.m, this.w) ;
+  par.pdgId = 441 ;
+  par.decays = [
+    [0.041, [331,211,-211]] ,
+    [0.009, [213,-213]] ,
+    [0.009, [113,-113]] ,
+    [0.010, [ 313, 321, 211]] ,
+    [0.010, [-313,-321,-211]] ,
+    [0.011, [-313,-313,211,-211]]
+  ] ;
+  par.normalise_decays() ;
+  par.m = inverse_cauchy(Math.random()/(Math.PI*par.w), par.m, par.w) ;
+  var  E = Math.sqrt(par.m*par.m+par.p4_0.p()*par.p4_0.p()) ;
+  par.p4_0.t = E ;
+  return par ;
+}
+
 function Jpsi_object(r0){
   var par = new particle_object(3097, 0, r0, true) ;
   par.color = generic_color ;
@@ -450,23 +477,14 @@ function Jpsi_object(r0){
   par.matter = 0 ;
   par.y0 = cauchy(this.m, this.m, this.w) ;
   par.pdgId = 443 ;
-  par.make_random_masses = function(n, lower, upper){
-    this.masses = [] ;
-    var counter = 0 ;
-    var y_max = cauchy(this.m, this.m, this.w) ;
-    while(counter<n){
-      var m = inverse_cauchy(Math.random()/(Math.PI*this.w), this.m, this.w) ;
-      if(!isNaN(m)){
-        counter++ ;
-        this.masses.push(m) ;
-      }
-    }
-  }
   par.decays = [
     [0.5, [11,-11]] ,
     [0.5, [13,-13]]
   ] ;
   par.normalise_decays() ;
+  par.m = inverse_cauchy(Math.random()/(Math.PI*par.w), par.m, par.w) ;
+  var  E = Math.sqrt(par.m*par.m+par.p4_0.p()*par.p4_0.p()) ;
+  par.p4_0.t = E ;
   return par ;
 }
 
@@ -483,7 +501,7 @@ function virtual_photon_object(r0, m){
   [0.25, [411, -411]] ,
   [0.25, [431, -431]] ,
   [0.25, [15,   -15]] ,
-  [0.25, [13,   -13]] 
+  [0.01, [443,   22]]
   ] ;
   par.normalise_decays() ;
   return par ;

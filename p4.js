@@ -85,7 +85,8 @@ function fourVector(){
   this.py = function(){ return this.y ; }
   this.pz = function(){ return this.z ; }
   this.pT = function(){ return Math.sqrt(this.x*this.x+this.y*this.y) ; }
-  this.p  = function(){ return Math.sqrt( Math.pow(this.px(),2) + Math.pow(this.py(),2) + Math.pow(this.pz(),2) ) ; }
+  this.p2 = function(){ return Math.pow(this.px(),2) + Math.pow(this.py(),2) + Math.pow(this.pz(),2) ; }
+  this.p  = function(){ return Math.sqrt( this.p2() ) ; }
   this.E  = function(){ return this.t ; }
   this.m2 = function(){ return Math.pow(this.E(),2) - Math.pow(this.p(),2) ; }
   this.m  = function(){

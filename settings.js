@@ -1,4 +1,4 @@
-var pause = false ;
+var pause = true ;
 
 var counter = 0 ;
 var stop =  -1 ;

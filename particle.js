@@ -108,6 +108,20 @@ function particle_object(m, q, r0, unstable){
   }
 }
 
+function recursively_decay_daughters(particle){
+  if(particle.daughters.length>0){
+    for(var i=0 ; i<particle.daughters.length ; i++){
+      recursively_decay_daughters(particle.daughters[i]) ;
+    }
+  }
+  else if(particle.decays.length>0){
+    particle.decay_top_level(particle.p4_0.m()) ;
+  }
+  else{
+    return ;
+  }
+}
+
 function recursively_displace(particle, dx, dy, dz){
     for(var i=0 ; i<particle.daughters.length ; i++){
       var d = particle.daughters[i] ;

@@ -17,6 +17,18 @@ function mu_trigger_object(){
   }
 }
 
+function mu_mu_trigger_object(){
+  this.analyse_particles = function(particles){
+    var n_mu_p = 0 ;
+    var n_mu_m = 0 ;
+    for(var i=0 ; i<particles.length ; i++){
+      if(particles[i].pdgId== 13) n_mu_m++ ;
+      if(particles[i].pdgId==-13) n_mu_p++ ;
+    }
+    return (n_mu_m>0 && n_mu_p>0) ;
+  }
+}
+
 function e_mu_trigger_object(){
   this.analyse_particles = function(particles){
     var has_e  = false ;
@@ -26,6 +38,16 @@ function e_mu_trigger_object(){
       if(Math.abs(particles[i].pdgId)==13) has_mu = true ;
     }
     return (has_e && has_mu) ;
+  }
+}
+
+function e_OR_mu_trigger_object(){
+  this.analyse_particles = function(particles){
+    for(var i=0 ; i<particles.length ; i++){
+      if(Math.abs(particles[i].pdgId)==11) return true ;
+      if(Math.abs(particles[i].pdgId)==13) return true ;
+    }
+    return false ;
   }
 }
 

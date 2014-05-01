@@ -24,15 +24,9 @@ function start(){
   Get('th_particle_color_neutrino').style.backgroundColor = 'rgb(' + neutrino_color + ')' ;
   Get('th_particle_color_generic' ).style.backgroundColor = 'rgb(' + generic_color  + ')' ;
   
-  //histogram = new histogram_object('mass (Kππ)', 750, 3000, 50, 'MeV') ;
-  //histogram = new histogram_object('mass (Kπ)' , 500, 1500, 50, 'MeV') ;
-  //histogram = new histogram_object('mass (γγπ)' , 100, 2100, 50, 'MeV') ;
-  //histogram = new histogram_object('mass (ππ)' , 250, 1500, 50, 'MeV') ;
-  //histogram = new histogram_object('mass (eμ)' , 100, 2600, 50, 'MeV') ;
-  histogram = new histogram_object('mass (KK)' , 950, 1150, 50, 'MeV') ;
-  //histogram = new histogram_object('mass (6γ)' ,   500, 600, 50, 'MeV') ;
+  histogram = new histogram_object('mass (KK)' , 960, 1060, 50, 'MeV') ;
   //histogram = new histogram_object('mass (ππγ)' ,   0, 2000, 50, 'MeV') ;
-  //histogram = new histogram_object('mass (ππ0)' ,   0, 1200, 60, 'MeV') ;
+  histogram = new histogram_object('mass (mumu)' ,   0, 6000, 25, 'MeV') ;
   plot_space = new plot_space_object() ;
 
   // Build detector
@@ -46,34 +40,32 @@ function start(){
   detector.components.push(ecal    ) ;
   detector.components.push(hcal    ) ;
   
-  //detector.triggers.push(new e_mu_trigger_object()) ;
-  //detector.triggers.push(new mu_trigger_object()) ;
-  //detector.triggers.push(new gg_trigger_object()) ;
-  //detector.triggers.push(new K_pi_trigger_object()) ;
-  detector.triggers.push(new K_K_trigger_object()) ;
+  detector.triggers.push(new mu_mu_trigger_object()) ;
   
   detector.assess_critical_layers() ;
   update_coords() ;
   
+  draw_detector([]) ;
+  histogram.draw(plot_space, 'e') ;
   heartbeat() ;
 }
 
 function    Get(id  ){ return document.getElementById(id)  ; }
 function Create(type){ return document.createElement(type) ; }
 
-var gammaStar = virtual_photon_object([0,0,0], 4000) ;
-
 function heartbeat(){
   if(counter>stop && stop>0) return ;
   if(!pause){
     Get('pre_info').innerHTML = '' ;
     
+    var mu = 4000+2000*Math.random() ;
+    var gammaStar = virtual_photon_object([0,0,0], mu) ;
     var success = false ;
     var particles = [] ;
     var n_tries = 0 ;
-    while(success==false && n_tries<10){
+    while(success==false && n_tries<100){
       n_tries++ ;
-      gammaStar.decay_top_level(3800) ;
+      gammaStar.decay_top_level(mu) ;
       particles = recursively_add_particles(gammaStar, []) ;
       for(var i=0 ; i<detector.triggers.length ; i++){
         if(detector.triggers[i].analyse_particles(particles)){
@@ -82,40 +74,59 @@ function heartbeat(){
         }
       }
     }
-    for(var i=0 ; i<particles.length ; i++){ particles[i].id = i ; }
-    var paths = detector.process_particles(particles) ;
-    smear_p(particles, 0.00) ;
-    var event = new event_container(particles) ;
-    
-    Get('span_nEvents').innerHTML = counter ; //events.length ;
-    
-    //var pions_plus  = event.pions_p() ;
-    //var pions_minus = event.pions_m() ;
-    var kaons_plus  = event.kaons_p() ;
-    var kaons_minus = event.kaons_m() ;
-    
-    //var pions       = event.pions() ;
-    var photons     = event.photons() ;
-    //var Kpi1  = combine_lists_of_particles( 313, [kaons_minus,pions_plus]) ;
-    //var Kpi2  = combine_lists_of_particles(-313, [kaons_plus,pions_minus]) ;
-    //var pi0  = combine_lists_of_particles(111, [photons,photons]) ;
-    //var pi0  = filter_list_of_particles_by_mass(pi0,130,140) ;
-    //var eta  = combine_lists_of_particles(223, [pi0,pi0,pi0]) ;
-    //var rho  = combine_lists_of_particles(213, [pi0,pions]) ;
-    //var phi  = combine_lists_of_particles(333, [kaons_plus,kaons_minus]) ;
-    var phi  = combine_lists_of_particles(333, [kaons_plus,kaons_minus]) ;
-    //var w = (rho.length==0) ? 1.0 : 1.0/rho.length ;
-    //for(var i=0 ; i<Kpi1.length ; i++){ histogram.fill(Kpi1[i].p4_0.m()) ; }
-    //for(var i=0 ; i<Kpi2.length ; i++){ histogram.fill(Kpi2[i].p4_0.m()) ; }
-    for(var i=0 ; i<phi.length ; i++){ histogram.fill(phi[i].p4_0.m()) ; }
-    
-    if(counter%draw_interval==0){
+    if(counter==0){
       write_particle_info_table(particles) ;
-      draw_detector(paths) ;
     }
-    histogram.draw(plot_space, 'e') ;
+    if(success){
+      // Make some jets
+      var nJets = 2 + Math.floor(3*Math.random()) ;
+      var px = 0 ;
+      var py = 0 ;
+      var jet_particles = [] ;
+      for(var i=0 ; i<nJets ; i++){
+        var pt = 1000 - 5000*Math.log(Math.random()) ;
+        var eta = -2.5 + 5*Math.random() ;
+        var phi = 2*Math.PI*Math.random() ;
+        var jet = new jet_object(0,0,[0,0,0],pt,eta,phi) ;
+        if(jet.is_valid){
+          px += jet.p4_0.x ;
+          py += jet.p4_0.y ;
+          recursively_decay_daughters(jet) ;
+          jet_particles = recursively_add_particles(jet, jet_particles) ;
+        }
+      }
+      // Now balance out pt
+      px *= -1 ;
+      py *= -1 ;
+      for(var i=0 ; i<particles.length ; i++){
+        var m2 = particles[i].p4_0.m2() ;
+        particles[i].p4_0.x += px ;
+        particles[i].p4_0.y += py ;
+        var p2 = particles[i].p4_0.p2() ;
+        var E = Math.sqrt(m2+p2) ;
+        particles[i].p4_0.t = E ;
+      }
+      particles = particles.concat(jet_particles) ;
+      
+      for(var i=0 ; i<particles.length ; i++){ particles[i].id = i ; }
+      var paths = detector.process_particles(particles) ;
+      smear_p(particles, 0.00) ;
+      var event = new event_container(particles) ;
+      
+      var muons_plus  = event.muons_p() ;
+      var muons_minus = event.muons_m() ;
+      var jpsi  = combine_lists_of_particles(443, [muons_plus,muons_minus]) ;
+      for(var i=0 ; i<jpsi.length ; i++){ histogram.fill(jpsi[i].p4_0.m()) ; }
+      
+      if(counter%draw_interval==0){
+        write_particle_info_table(particles) ;
+        draw_detector(paths) ;
+      }
+      histogram.draw(plot_space, 'e') ;
+      if(success) events.push(event) ;
+    }
     counter++ ;
-    if(success) events.push(event) ;
+    Get('span_nEvents').innerHTML = events.length + ' / ' + counter ;
   }
   window.setTimeout(heartbeat, delay) ;
 }
