@@ -39,44 +39,38 @@
   <div class="tab">
     <div class="tab_row">
       <div class="tab_cell">
-          <canvas id="canvas_detector_cutaway" width="500" height="500"></canvas><br />
+          <canvas id="canvas_detector_cutaway" width="500" height="460"></canvas><br />
       </div>
       <div class="tab_cell">
         <canvas id="canvas_detector_transverse" width="250" height="250"></canvas><br />
-        
-        <h3>Change detector view</h3>
-        <p class="center">x: <input type="text" id="input_x"/> y: <input type="text" id="input_y"/> z: <input type="text" id="input_z"/><br />
-          &theta;: <input type="text" id="input_t"/> &phi;: <input type="text" id="input_p"/><br />
-          <input type="submit" id="submit_coords" value="Change view"/>
-        </p>
-        
-        <h3>Particle colours</h3>
-        <table>
-          <tbody>
-            <tr>
-              <th id="th_particle_color_electron" class="particle_color">&nbsp;</th><td class="particle_color">Electron</td>
-              <th id="th_particle_color_muon"     class="particle_color">&nbsp;</th><td class="particle_color">Muon</td>
-            </tr>
-            <tr>
-              <th id="th_particle_color_tau"   class="particle_color">&nbsp;</th><td class="particle_color">Tau</td>
-              <th id="th_particle_color_pion"     class="particle_color">&nbsp;</th><td class="particle_color">Pion</td>
-            </tr>
-            <tr>
-              <th id="th_particle_color_kaon"     class="particle_color">&nbsp;</th><td class="particle_color">Kaon</td>
-              <th id="th_particle_color_neutrino" class="particle_color">&nbsp;</th><td class="particle_color">Neutrino</td>
-            </tr>
-            <tr>
-              <th id="th_particle_color_photon"   class="particle_color">&nbsp;</th><td class="particle_color">Photon</td>
-              <th id="th_particle_color_generic"  class="particle_color">&nbsp;</th><td class="particle_color">Other</td>
-            </tr>
-          </tbody>
-        </table>        
+        <canvas id="canvas_detector_longitudinal" width="250" height="200"></canvas><br />  
         </p>
       </div>
     </div>
     <div class="tab_row">
       <div class="tab_cell">
-        <canvas id="canvas_detector_longitudinal" width="500" height="300"></canvas>
+        <h3>Change detector view</h3>
+        <p class="center">x: <input type="text" id="input_x"/> y: <input type="text" id="input_y"/> z: <input type="text" id="input_z"/><br />
+          &theta;: <input type="text" id="input_t"/> &phi;: <input type="text" id="input_p"/><input type="submit" id="submit_coords" value="Change view"/>
+        </p>
+        <h3>Particle colours</h3>
+        <table>
+          <tbody>
+            <tr>
+              <th id="th_particle_color_electron" class="particle_color">&nbsp;</th><td class="particle_color">Electron (\(e^\pm\))</td>
+              <th id="th_particle_color_muon"     class="particle_color">&nbsp;</th><td class="particle_color">Muon (\(\mu^\pm\))</td>
+              <th id="th_particle_color_tau"   class="particle_color">&nbsp;</th><td class="particle_color">Tau (\(\tau^\pm\))</td>
+              <th id="th_particle_color_neutrino" class="particle_color">&nbsp;</th><td class="particle_color">Neutrino (\(\nu,\bar{\nu}\))</td>
+            </tr>
+            <tr>
+              <th id="th_particle_color_pion"     class="particle_color">&nbsp;</th><td class="particle_color">Pion (\(\pi^\pm\))</td>
+              <th id="th_particle_color_kaon"     class="particle_color">&nbsp;</th><td class="particle_color">Kaon (\(K^\pm\))</td>
+              
+              <th id="th_particle_color_photon"   class="particle_color">&nbsp;</th><td class="particle_color">Photon (\(\gamma\))</td>
+              <th id="th_particle_color_generic"  class="particle_color">&nbsp;</th><td class="particle_color">Other (\(K_L^0\) etc)</td>
+            </tr>
+          </tbody>
+        </table>      
       </div>
       <div class="tab_cell">
         <canvas id="canvas_plot" width="250" height="250"></canvas>

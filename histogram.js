@@ -7,15 +7,20 @@ function histogram_object(xaxis, lower, upper, nBins, units){
   this.xaxis = xaxis ;
   this.yaxis = 'events per ' + this.binWidth.toPrecision(2) + ' ' + units ;
   this.bins = [] ;
+  this.bin_errors = [] ;
   this.active_bins = [] ;
   for(var i=0 ; i<this.nBins+1 ; i++){
     this.bins.push(0) ;
+    this.bin_errors.push(0) ;
     this.active_bins.push(false) ;
   }
-  this.fill = function(x){
+  this.fill = function(x,w){
+    if(w==null || w==undefined) w = 1 ;
     var bin = Math.floor((x-lower)/this.binWidth) ;
+    if(bin<1||bin>this.bins.length) return ;
     this.active_bins[bin] = true ;
-    this.bins[bin+1]++ ;
+    this.bins[bin+1]       += w   ;
+    this.bin_errors[bin+1] += w*w ;
   }
   this.draw = function(plot_space, options){
     var ml = plot_space.margin_left   ;
@@ -31,10 +36,19 @@ function histogram_object(xaxis, lower, upper, nBins, units){
     c.strokeStyle = 'rgb(0,0,0)' ;
     c.strokeRect(ml,mt,pw,ph) ;
     var bin_max = 1 ;
+    var bin_error_max = 1 ;
     for(var i=1 ; i<=nBins ; i++){
-      if(this.bins[i]>bin_max) bin_max = this.bins[i] ;
+      if(this.bins[i]+Math.sqrt(this.bin_errors[i])>bin_max){
+        bin_max = this.bins[i]+Math.sqrt(this.bin_errors[i]) ;
+        bin_error_max = this.bin_errors[i] ;
+      }
     }
-    bin_max += 2*Math.sqrt(bin_max) ;
+    if(bin_max>5e2){
+      bin_max *= 1.25 ;
+    }
+    else{
+      bin_max += 2*Math.sqrt(bin_error_max) ;
+    }
     
     // Draw the bin contents
     for(var i=1 ; i<=nBins ; i++){
@@ -53,8 +67,8 @@ function histogram_object(xaxis, lower, upper, nBins, units){
         c.arc(u, v, r, 0, 2*Math.PI, true) ;
         c.fill() ;
         
-        var v_up   = v-ph*Math.sqrt(this.bins[i])/bin_max ;
-        var v_down = v+ph*Math.sqrt(this.bins[i])/bin_max ;
+        var v_up   = v-ph*Math.sqrt(this.bin_errors[i])/bin_max ;
+        var v_down = v+ph*Math.sqrt(this.bin_errors[i])/bin_max ;
         c.beginPath() ;
         c.moveTo(u,v_down) ;
         c.lineTo(u,v_up  ) ;
@@ -99,6 +113,7 @@ function histogram_object(xaxis, lower, upper, nBins, units){
     var x_tick_start = x_small_tick*(1 + Math.floor(this.lower/x_small_tick)) ;
     var x_tick_end   = x_small_tick*(    Math.floor(this.upper/x_small_tick)) ;
     var v = ch - mb ;
+    c.strokeStyle = 'rgb(0,0,0)' ;
     c.font = '10px times' ;
     c.fillStyle = 'rgb(0,0,0)' ;
     c.textAlign = 'center' ;
@@ -141,7 +156,7 @@ function histogram_object(xaxis, lower, upper, nBins, units){
       c.moveTo(cw-mr   ,v) ;
       c.lineTo(cw-mr-tick_length,v) ;
       c.stroke() ;
-      if(power>=2){
+      if(power>2){
         c.fillText(y/Math.pow(10,power).toPrecision(2), u-5, v) ;
       }
       else{
@@ -150,7 +165,7 @@ function histogram_object(xaxis, lower, upper, nBins, units){
     }
     
     // y-axis unit
-    if(power>1){
+    if(power>2){
       c.font = '15px times' ;
       c.fillText('x10', 0.5*ml, mt*1.5) ;
       c.font = '8px times' ;
@@ -170,7 +185,7 @@ function histogram_object(xaxis, lower, upper, nBins, units){
   this.r_from_x = function(x){ return (x-this.lower)/(this.upper-this.lower) ; }
 }
 
-function plot_space(){
+function plot_space_object(){
   this.margin_left   = 50 ;
   this.margin_right  = 10 ;
   this.margin_top    = 10 ;

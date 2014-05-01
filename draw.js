@@ -1,4 +1,4 @@
-function draw_polygons(settings, particles, canvas, image_name){
+function draw_polygons(settings, trajs, canvas, image_name){
   var r0 = settings.r0 ;
   var t0 = settings.t0 ;
   var p0 = settings.p0 ;
@@ -13,10 +13,10 @@ function draw_polygons(settings, particles, canvas, image_name){
   context.fillRect(0,0,cw,ch) ;
   
   var particle_polygons = []  ;
-  for(var i=0 ; i<particles.length ; i++){
-    for(var j=0 ; j<particles[i].path.length-1 ; j++){
-      var l = new polygon_object(particles[i].color) ;
-      var p = particles[i].path ;
+  for(var i=0 ; i<trajs.length ; i++){
+    for(var j=0 ; j<trajs[i].xyz.length-1 ; j++){
+      var l = new polygon_object(trajs[i].color) ;
+      var p = trajs[i].xyz ; ;
       l.add_point(p[j+0][0], p[j+0][1], p[j+0][2]) ;
       l.add_point(p[j+1][0], p[j+1][1], p[j+1][2]) ;
       l.line_opacity = 1.0 ;
@@ -28,8 +28,10 @@ function draw_polygons(settings, particles, canvas, image_name){
   var polygons = [] ;
   var lines    = [] ;
   
+  var shapes = [] ;
   if(image_canvas_detector[image_name]){
     context.drawImage(image_canvas_detector[image_name],0,0) ;
+    shapes = [ particle_polygons ] ;
   }
   else{
     for(var i=0 ; i<detector.components.length ; i++){
@@ -39,9 +41,9 @@ function draw_polygons(settings, particles, canvas, image_name){
         lines    =    lines.concat(com.cells[j].lines   ) ;
       }
     }
+    shapes = [ polygons , lines , particle_polygons ] ;
   }
   
-  var shapes = [ polygons , lines , particle_polygons ] ;
   for(var i=0 ; i<shapes.length ; i++){
     for(var j=0 ; j<shapes[i].length ; j++){
       var pol = shapes[i][j] ;
@@ -65,8 +67,8 @@ function draw_polygons(settings, particles, canvas, image_name){
       if(Math.abs(phi)>phi_cut && pol.type!='particle') continue ;
       
       context.beginPath() ;
-      var opacity = (pol.hot==true) ? 1.0 : 0.5 ;
-      context.fillStyle   = 'rgba('+pol.rgb+','+opacity+')' ;
+      var opacity         = (pol.hot==true) ? 0.5 : 0.5 ;
+      context.fillStyle   = (pol.hot==true) ? 'rgba('+pol.rgb+','+opacity+')' : 'rgba('+pol.rgb+','+opacity+')' ;
       context.strokeStyle = 'rgba('+pol.rgb+','+pol.line_opacity+')' ;
       if(pol.line_color) context.strokeStyle = pol.line_color ;
     
@@ -82,7 +84,11 @@ function draw_polygons(settings, particles, canvas, image_name){
         var b = 0.5*ch*(1-pol.points[k].y/pz) ;
         context.lineTo(a,b) ;
       }
-      if(i==0){
+      if(shapes.length==1){
+        context.lineWidth = 3 ;
+        context.stroke() ;
+      }
+      else if(i==0){
         if(pol.close) context.closePath(a,b) ;
         context.fill() ;
       }
@@ -115,11 +121,11 @@ function draw_all(particles){
   histogram.draw(ps, 'e') ;
 }
 
-function draw_detector(particles){
+function draw_detector(paths){
   var names = ['cutaway' , 'transverse' , 'longitudinal'] ;
   for(var i=0 ; i<names.length ; i++){
     var canvas  = Get('canvas_detector_'+names[i]) ;
-    draw_polygons(draw_settings[names[i]], particles, canvas, names[i]) ;
+    draw_polygons(draw_settings[names[i]], paths, canvas, names[i]) ;
   }
 }
 
@@ -137,6 +143,22 @@ function polygon_object(rgb){
   }
 }
 
+function get_centroid_xyz(points){
+  var cx = 0 ;
+  var cy = 0 ;
+  var cz = 0 ;
+  var n = points.length ;
+  for(var i=0 ; i<n ; i++){
+    cx += points[i][0] ;
+    cy += points[i][1] ;
+    cz += points[i][2] ;
+  }
+  cx /= n ;
+  cy /= n ;
+  cz /= n ;
+  return [cx,cy,cz] ;
+}
+
 function get_centroid(points){
   var cx = 0 ;
   var cy = 0 ;
@@ -151,5 +173,4 @@ function get_centroid(points){
   cy /= n ;
   cz /= n ;
   return [cx,cy,cz] ;
-  return make_point(cx,cy,cz) ;
 }

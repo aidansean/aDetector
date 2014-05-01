@@ -26,20 +26,19 @@ function particle_object(m, q, r0, unstable){
   this.ecal_blocks  = [] ;
   this.hcal_blocks  = [] ;
   
-  this.add_tracker_hit = function(x, y, z, r){
+  this.add_tracker_hit = function(x, y, z, r, p4){
     // First put the hit in the layer
     var r_tmp = Math.sqrt(x*x+y*y) ;
     var ratio = r_tmp/r ;
     x *= ratio ;
     y *= ratio ;
-    
-    this.tracker_hits.push(make_point(x, y, z)) ;
+    this.tracker_hits.push([make_point(x, y, z), p4]) ;
   }
-  this.add_ecal_block = function(x, y, z, cell){
-    this.ecal_cells.push([make_point(x, y, z),cell]) ;
+  this.add_ecal_block = function(x, y, z, p4, cell){
+    this.ecal_blocks.push([make_point(x, y, z),cell,p4]) ;
   }
-  this.add_hcal_block = function(x, y, z, cell){
-    this.hcal_cells.push([make_point(x, y, z),cell]) ;
+  this.add_hcal_block = function(x, y, z, p4, cell){
+    this.hcal_blocks.push([make_point(x, y, z),cell,p4]) ;
   }
   
   this.choose_random_decay = function(){

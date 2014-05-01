@@ -1,3 +1,9 @@
+function particle_trajectory(path_xyz, path_p, color){
+  this.xyz   = path_xyz ;
+  this.p     = path_p   ;
+  this.color = color    ;
+}
+
 function detector_object(){
   this.components = [] ;
   this.triggers   = [] ;
@@ -28,13 +34,18 @@ function detector_object(){
     this.critical_layers.push( [r2*1.2, null, 'end'] ) ;
   }
   
+  this.process_particles = function(particles){
+    var trajs = [] ;
+    for(var i=0 ; i<particles.length ; i++){
+      trajs.push(this.process_particle(particles[i])) ;
+    }
+    return trajs ;
+  }
   this.process_particle = function(particle){
     // Propagate particle through detector
     var x = particle.r_0.x ;
     var y = particle.r_0.y ;
     var z = particle.r_0.z ;
-    //alert(particle.pdgId + ' ' + x + ',' + y + ',' + z) ;
-    //if(particle.pdgId==310) alert('K0: ' + particle.r_decay.x + ' ' + particle.r_decay.y + ' ' + particle.r_decay.z) ;
     
     // Convert everything to MKS
     var B = B_field ;
@@ -59,11 +70,18 @@ function detector_object(){
     var v2 = vx*vx+vy*vy+vz*vz ;
     var g2 = v2/c2 ;
     
-    var points = [] ;
+    var pMev  = p*c/(1e6*e) ;
+    var EMev  = E/(1e6*e) ;
+    var pxMev = px*c/(1e6*e) ;
+    var pyMev = py*c/(1e6*e) ;
+    var pzMev = pz*c/(1e6*e) ;
+    
+    var points_xyz = [] ;
+    var points_p   = [] ;
     var dt = 1e-10 ;
     
     // Make a path through the detector
-    points.push([x,y,z]) ;
+    //points.push([x,y,z], [px,py,pz,E]) ;
     var critical_layer_index = 0 ;
     var stopping_power = 0.0 ;
     var cl = this.critical_layers[0] ;
@@ -74,14 +92,16 @@ function detector_object(){
     // Move through detector, step by step
     for(var i=0 ; i<1000 ; i++){
       if(particle.r_decay && particle.q==0){
-        points.push([particle.r_decay.x,particle.r_decay.y,particle.r_decay.z]) ;
+        points_xyz.push([particle.r_decay.x,particle.r_decay.y,particle.r_decay.z]) ;
+        points_p.push([pxMev,pyMev,pzMev,EMev]) ;
         break ;
       }
       var r2 = x*x + y*y ;
       if(r2>r2_decay){
         if(particle.r_decay){
-          points.pop() ;
-          points.push(particle.r_decay.x,particle.r_decay.y,particle.r_decay.z) ;
+          points_xyz.pop() ;
+          points_xyz.push([particle.r_decay.x,particle.r_decay.y,particle.r_decay.z]) ;
+          points_p.push([pxMev,pyMev,pzMev,EMev]) ;
         }
         break ;
       }
@@ -130,20 +150,27 @@ function detector_object(){
       y += vy*dt ;
       z += vz*dt ;
       
-      points.push([x,y,z]) ;
+      pMev = p*c/(1e6*e) ;
+      EMev = E/(1e6*e) ;
+      pxMev = pMev*Math.sin(theta)*Math.cos(phi) ;
+      pyMev = pMev*Math.sin(theta)*Math.sin(phi) ;
+      pzMev = pMev*Math.cos(theta) ;
+      
+      points_xyz.push([x,y,z]) ;
+      points_p  .push([pxMev,pyMev,pzMev,EMev]) ;
     }
-    particle.path = points ;
+    var traj = new particle_trajectory(points_xyz, points_p, particle.color) ;
     
     // Handle tracker
     var tracker = this.components[1] ; // Fix this later
     var layer_index = 0 ;
-    for(var i=0 ; i<points.length-1 ; i++){
-      if(Math.abs(points[i][2])>0.5*tracker.z_length) continue ;
-      var p1 = points[i+0] ;
-      var p2 = points[i+1] ;
+    for(var i=0 ; i<points_xyz.length-1 ; i++){
+      if(Math.abs(points_xyz[2])>0.5*tracker.z_length) continue ;
+      var p1 = points_xyz[i+0] ;
+      var p2 = points_xyz[i+1] ;
       var r2 = Math.pow(tracker.layer_radii[layer_index],2) ;
       if(p1[0]*p1[0]+p1[1]*p1[1]<r2 && p2[0]*p2[0]+p2[1]*p2[1]>r2){
-        particle.add_tracker_hit(0.5*(p1[0]+p2[0]), 0.5*(p1[1]+p2[1]), 0.5*(p1[2]+p2[2]), Math.sqrt(r2)) ;
+        particle.add_tracker_hit(0.5*(p1[0]+p2[0]), 0.5*(p1[1]+p2[1]), 0.5*(p1[2]+p2[2]), Math.sqrt(r2), points_p[i]) ;
         layer_index++ ;
         if(layer_index==tracker.layer_radii.length) break ;
       }
@@ -152,17 +179,17 @@ function detector_object(){
     // Handle ecal
     var ecal = this.components[2] ; // Fix this later
     var layer_index = 0 ;
-    for(var i=0 ; i<points.length-1 ; i++){
-      if(Math.abs(points[i][2])>0.5*ecal.z_length) continue ;
-      var p1 = points[i+0] ;
-      var p2 = points[i+1] ;
+    for(var i=0 ; i<points_xyz.length-1 ; i++){
+      if(Math.abs(points_xyz[2])>0.5*ecal.z_length) continue ;
+      var p1 = points_xyz[i+0] ;
+      var p2 = points_xyz[i+1] ;
       var r2 = Math.pow(ecal.layer_radii[layer_index],2) ;
       if(p1[0]*p1[0]+p1[1]*p1[1]<r2 && p2[0]*p2[0]+p2[1]*p2[1]>r2){
         var x = 0.5*(p1[0]+p2[0]) ;
         var y = 0.5*(p1[1]+p2[1]) ;
         var z = 0.5*(p1[2]+p2[2]) ;
         var block = ecal.seek_block(x, y, z) ;
-        if(block) particle.add_ecal_block(x, y, z, block) ;
+        if(block) particle.add_ecal_block(x, y, z, points_p[i], block) ;
         layer_index++ ;
         if(layer_index==ecal.layer_radii.length) break ;
       }
@@ -171,21 +198,22 @@ function detector_object(){
     // Handle hcal
     var hcal = this.components[3] ; // Fix this later
     var layer_index = 0 ;
-    for(var i=0 ; i<points.length-1 ; i++){
-      if(Math.abs(points[i][2])>0.5*hcal.z_length) continue ;
-      var p1 = points[i+0] ;
-      var p2 = points[i+1] ;
+    for(var i=0 ; i<points_xyz.length-1 ; i++){
+      if(Math.abs(points_xyz[2])>0.5*hcal.z_length) continue ;
+      var p1 = points_xyz[i+0] ;
+      var p2 = points_xyz[i+1] ;
       var r2 = Math.pow(hcal.layer_radii[layer_index],2) ;
       if(p1[0]*p1[0]+p1[1]*p1[1]<r2 && p2[0]*p2[0]+p2[1]*p2[1]>r2){
         var x = 0.5*(p1[0]+p2[0]) ;
         var y = 0.5*(p1[1]+p2[1]) ;
         var z = 0.5*(p1[2]+p2[2]) ;
         var block = hcal.seek_block(x, y, z) ;
-        if(block) particle.add_hcal_cell(x, y, z, block) ;
+        if(block) particle.add_hcal_block(x, y, z, points_p[i], block) ;
         layer_index++ ;
         if(layer_index==hcal.layer_radii.length) break ;
       }
     }
+    return traj ;
   }
 }
 

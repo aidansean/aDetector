@@ -188,6 +188,9 @@ function rho_object(q, r0){
     [1.0, [211,111]]
   ] ;
   par.normalise_decays() ;
+  par.m = inverse_cauchy(Math.random()/(Math.PI*par.w), par.m, par.w) ;
+  var  E = Math.sqrt(par.m*par.m+par.p4_0.p()*par.p4_0.p()) ;
+  par.p4_0.t = E ;
   return par ;
 }
 
@@ -272,6 +275,9 @@ function phi_object(r0){
     [0.013, [221,22]]
   ] ;
   par.normalise_decays() ;
+  par.m = inverse_cauchy(Math.random()/(Math.PI*par.w), par.m, par.w) ;
+  var  E = Math.sqrt(par.m*par.m+par.p4_0.p()*par.p4_0.p()) ;
+  par.p4_0.t = E ;
   return par ;
 }
 
@@ -322,12 +328,15 @@ function K892_object(q, r0){
   par.color = kaon_color ;
   par.type = 'charged_hadron' ;
   par.matter = -q ;
-  par.w = 1e-20 ;
+  par.w = 50.8*0.5 ;
   par.pdgId = (q==1) ? -323 : 323 ;
   par.decays = [
     [1, [321,111]]
   ] ;
   par.normalise_decays() ;
+  par.m = inverse_cauchy(Math.random()/(Math.PI*par.w), par.m, par.w) ;
+  var  E = Math.sqrt(par.m*par.m+par.p4_0.p()*par.p4_0.p()) ;
+  par.p4_0.t = E ;
   return par;
 }
 
@@ -336,12 +345,15 @@ function K892_0_object(q, r0){
   par.color = kaon_color ;
   par.type = 'charged_hadron' ;
   par.matter = -q ;
-  par.w = 1e-20 ;
+  par.w = 26.2*0.5 ;
   par.pdgId = (q==1) ? -313 : 313 ;
   par.decays = [
     [1, [321,-211]]
   ] ;
   par.normalise_decays() ;
+  par.m = inverse_cauchy(Math.random()/(Math.PI*par.w), par.m, par.w) ;
+  var  E = Math.sqrt(par.m*par.m+par.p4_0.p()*par.p4_0.p()) ;
+  par.p4_0.t = E ;
   return par;
 }
 

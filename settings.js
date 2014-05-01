@@ -2,7 +2,7 @@ var pause = false ;
 
 var counter = 0 ;
 var stop =  -1 ;
-var delay = 2 ;
+var delay =  2 ;
 var draw_interval = 25 ;
 
 var x0 = -4.0  ;

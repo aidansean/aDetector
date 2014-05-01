@@ -9,6 +9,11 @@ function component_cell(rgb_plane, rgb_line){
   this.line_opacity    = 0.1 ;
   this.bounding_point1 = new threeVector() ;
   this.bounding_point2 = new threeVector() ;
+  this.make_hot = function(value){
+    for(var i=0 ; i<this.polygons.length ; i++){
+      this.polygons[i].hot = value ;
+    }
+  }
   this.make_shapes = function(rgb_plane, rgb_line){
     for(var i=0 ; i<this.polygon_indices.length ; i++){
       var p = new polygon_object(this.rgb_plane) ;

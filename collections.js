@@ -1,11 +1,26 @@
-function filter_list_of_particles_by_pdgId(list, pdgId){
+function filter_list_of_particles_by_mass(list, mass_lower, mass_upper){
   var results = [] ;
   for(var i=0 ; i<list.length ; i++){
-    if(list[i].pdgId==pdgId) results.push(list[i]) ;
+    var m = list[i].p4_0.m() ;
+    if(m>mass_lower && m<mass_upper) results.push(list[i]) ;
   }
   return results ;
 }
 
+function filter_list_of_particles_by_pdgId(list, pdgId, both_charges){
+  var results = [] ;
+  for(var i=0 ; i<list.length ; i++){
+    if(both_charges){
+      if(Math.abs(list[i].pdgId)==Math.abs(pdgId)) results.push(list[i]) ;
+    }
+    else{
+      if(list[i].pdgId==pdgId) results.push(list[i]) ;
+    }
+  }
+  return results ;
+}
+
+var uid = 1000 ;
 function combine_lists_of_particles(pdgId, particle_lists){
   if(particle_lists.length==0){
     return [] ;
@@ -20,9 +35,9 @@ function combine_lists_of_particles(pdgId, particle_lists){
     var results = particle_lists.pop() ;
     while(current_list = particle_lists.pop()){
       results = combine_two_lists_of_particles(results, current_list) ;
-    }
-    for(var i=0 ; i<results.length ; i++){
-      results[i].pdgId = pdgId ;
+      for(var i=0 ; i<results.length ; i++){
+        results[i].pdgId = pdgId ;
+      }
     }
     return results ;
   }
@@ -36,6 +51,8 @@ function combine_two_lists_of_particles(l1, l2){
       p.p4_0 = l1[i].p4_0.add(l2[j].p4_0) ;
       if(l1[i].pdgId!=0) p.daughters.push(l1[i]) ;
       if(l2[j].pdgId!=0) p.daughters.push(l2[j]) ;
+      p.id = uid ;
+      uid++ ;
       output.push(p) ;
     }
   }

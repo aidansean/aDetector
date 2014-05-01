@@ -100,16 +100,15 @@ function calorimeter_object(name, ri, ro, zl, nl, nseg, nsec, padding_xy, paddin
   this.seek_block = function(x, y, z){
     var best_dr2 = 1e6 ;
     var best_index = -1 ;
-    for(var i=0 ; i<this.blocks.length ; i++){
-      var c = get_centroid(this.blocks[i].cell.points) ;
-      var dr2 = (x-c.x)*(c-c.x) + (y-c.y)*(y-c.y) + (z-c.z)*(z-c.z) ;
+    for(var i=0 ; i<this.cells.length ; i++){
+      var c = get_centroid_xyz(this.cells[i].points) ;
+      var dr2 = (x-c[0])*(x-c[0]) + (y-c[1])*(y-c[1]) + (z-c[2])*(z-c[2]) ;
       if(dr2<best_dr2){
         best_dr2 = dr2 ;
         best_index = i ;
       }
     }
-    if(best_index==-1) return null ;
-    return this.blocks[best_index] ;
+    return best_index ;
   }
   
   
