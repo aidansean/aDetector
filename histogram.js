@@ -106,12 +106,13 @@ function histogram_object(xaxis, lower, upper, nBins, units){
     var x_range = this.upper-this.lower ;
     var x_small_tick = Math.pow(10, Math.floor(Math.log(x_range)/Math.log(10))-1) ;
     var n_small_ticks = x_range/x_small_tick ;
-    while(n_small_ticks>5){
+    while(n_small_ticks>8){
       x_small_tick *= 2 ;
       n_small_ticks = Math.floor(x_range/x_small_tick) ;
     }
     var x_tick_start = x_small_tick*(Math.floor(this.lower/x_small_tick)) ;
     var x_tick_end   = x_small_tick*(Math.floor(this.upper/x_small_tick)) ;
+    if(x_tick_start<this.lower) x_tick_start += x_small_tick ;
     var v = ch - mb ;
     c.strokeStyle = 'rgb(0,0,0)' ;
     c.font = '10px times' ;

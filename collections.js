@@ -7,6 +7,15 @@ function filter_list_of_particles_by_mass(list, mass_lower, mass_upper){
   return results ;
 }
 
+function filter_list_of_particles_by_p(list, p_lower){
+  var results = [] ;
+  var p2_lower = p_lower*p_lower ;
+  for(var i=0 ; i<list.length ; i++){
+    if(list[i].p4_0.p2()>p2_lower) results.push(list[i]) ;
+  }
+  return results ;
+}
+
 function filter_list_of_particles_by_pdgId(list, pdgId, both_charges){
   var results = [] ;
   for(var i=0 ; i<list.length ; i++){

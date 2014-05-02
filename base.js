@@ -24,9 +24,13 @@ function start(){
   Get('th_particle_color_neutrino').style.backgroundColor = 'rgb(' + neutrino_color + ')' ;
   Get('th_particle_color_generic' ).style.backgroundColor = 'rgb(' + generic_color  + ')' ;
   
-  histogram = new histogram_object('mass (KK)' , 960, 1060, 50, 'MeV') ;
+  //histogram = new histogram_object('mass (Kπ)' , 500, 1500, 25, 'MeV') ;
+  //histogram = new histogram_object('mass (KK)' , 1000, 1100, 25, 'MeV') ;
   //histogram = new histogram_object('mass (ππγ)' ,   0, 2000, 50, 'MeV') ;
-  histogram = new histogram_object('mass (mumu)' ,   0, 6000, 25, 'MeV') ;
+  //histogram = new histogram_object('mass (γγ)' ,   450, 650, 50, 'MeV') ;
+  //histogram = new histogram_object('mass (ee)' , 3090, 3100, 50, 'MeV') ;
+  histogram = new histogram_object('mass (ππ)' ,   200, 1200, 50, 'MeV') ;
+  //histogram = new histogram_object('m(KKπγ)-m(KKπ)' ,   0, 500, 50, 'MeV') ;
   plot_space = new plot_space_object() ;
 
   // Build detector
@@ -40,7 +44,7 @@ function start(){
   detector.components.push(ecal    ) ;
   detector.components.push(hcal    ) ;
   
-  detector.triggers.push(new mu_mu_trigger_object()) ;
+  detector.triggers.push(new BaBar_trigger_object()) ;
   
   detector.assess_critical_layers() ;
   update_coords() ;
@@ -48,6 +52,7 @@ function start(){
   draw_detector([]) ;
   histogram.draw(plot_space, 'e') ;
   heartbeat() ;
+  stopwatch() ;
 }
 
 function    Get(id  ){ return document.getElementById(id)  ; }
@@ -57,8 +62,7 @@ function heartbeat(){
   if(counter>stop && stop>0) return ;
   if(!pause){
     Get('pre_info').innerHTML = '' ;
-    
-    var mu = 4000+2000*Math.random() ;
+    var mu = 10580 ;
     var gammaStar = virtual_photon_object([0,0,0], mu) ;
     var success = false ;
     var particles = [] ;
@@ -67,6 +71,8 @@ function heartbeat(){
       n_tries++ ;
       gammaStar.decay_top_level(mu) ;
       particles = recursively_add_particles(gammaStar, []) ;
+      
+      // Check the trigger
       for(var i=0 ; i<detector.triggers.length ; i++){
         if(detector.triggers[i].analyse_particles(particles)){
           success = true ;
@@ -74,49 +80,17 @@ function heartbeat(){
         }
       }
     }
-    if(counter==0){
-      write_particle_info_table(particles) ;
-    }
+    if(counter==0) write_particle_info_table(particles) ;
     if(success){
-      // Make some jets
-      var nJets = 2 + Math.floor(3*Math.random()) ;
-      var px = 0 ;
-      var py = 0 ;
-      var jet_particles = [] ;
-      for(var i=0 ; i<nJets ; i++){
-        var pt = 1000 - 5000*Math.log(Math.random()) ;
-        var eta = -2.5 + 5*Math.random() ;
-        var phi = 2*Math.PI*Math.random() ;
-        var jet = new jet_object(0,0,[0,0,0],pt,eta,phi) ;
-        if(jet.is_valid){
-          px += jet.p4_0.x ;
-          py += jet.p4_0.y ;
-          recursively_decay_daughters(jet) ;
-          jet_particles = recursively_add_particles(jet, jet_particles) ;
-        }
-      }
-      // Now balance out pt
-      px *= -1 ;
-      py *= -1 ;
-      for(var i=0 ; i<particles.length ; i++){
-        var m2 = particles[i].p4_0.m2() ;
-        particles[i].p4_0.x += px ;
-        particles[i].p4_0.y += py ;
-        var p2 = particles[i].p4_0.p2() ;
-        var E = Math.sqrt(m2+p2) ;
-        particles[i].p4_0.t = E ;
-      }
-      particles = particles.concat(jet_particles) ;
-      
       for(var i=0 ; i<particles.length ; i++){ particles[i].id = i ; }
       var paths = detector.process_particles(particles) ;
-      smear_p(particles, 0.00) ;
+      smear_p(particles, 0.02) ;
       var event = new event_container(particles) ;
       
-      var muons_plus  = event.muons_p() ;
-      var muons_minus = event.muons_m() ;
-      var jpsi  = combine_lists_of_particles(443, [muons_plus,muons_minus]) ;
-      for(var i=0 ; i<jpsi.length ; i++){ histogram.fill(jpsi[i].p4_0.m()) ; }
+      var pions_plus  = filter_list_of_particles_by_p(event.pions_p(), 10) ;
+      var pions_minus = filter_list_of_particles_by_p(event.pions_m(), 10) ;
+      var pipi = combine_lists_of_particles(333, [pions_plus,pions_minus]) ;
+      for(var i=0 ; i<pipi.length ; i++){ histogram.fill(pipi[i].p4_0.m()) ; }
       
       if(counter%draw_interval==0){
         write_particle_info_table(particles) ;
@@ -128,7 +102,19 @@ function heartbeat(){
     counter++ ;
     Get('span_nEvents').innerHTML = events.length + ' / ' + counter ;
   }
+  if(one_event){
+    pause = true ;
+    one_event = false ;
+  }
   window.setTimeout(heartbeat, delay) ;
+}
+
+function stopwatch(){
+  if(!pause){
+    stopwatch_time += stopwatch_delay ;
+    Get('span_stopwatch').innerHTML = stopwatch_time ;
+  }
+  window.setTimeout(stopwatch, stopwatch_delay) ;
 }
 
 function write_particle_info_table(particles){

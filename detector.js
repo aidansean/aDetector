@@ -151,6 +151,7 @@ function detector_object(){
       z += vz*dt ;
       
       pMev = p*c/(1e6*e) ;
+      if(pMev<30) break ;
       EMev = E/(1e6*e) ;
       pxMev = pMev*Math.sin(theta)*Math.cos(phi) ;
       pyMev = pMev*Math.sin(theta)*Math.sin(phi) ;

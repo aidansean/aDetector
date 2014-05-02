@@ -1,9 +1,13 @@
 var pause = true ;
+var one_event = false ;
 
 var counter = 0 ;
 var stop =  -1 ;
 var delay =  2 ;
-var draw_interval = 25 ;
+var draw_interval = 1 ; //25 ;
+
+var stopwatch_delay = 1000 ;
+var stopwatch_time  =    0 ;
 
 var x0 = -4.0  ;
 var y0 =  1.0  ;

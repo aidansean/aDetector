@@ -58,6 +58,21 @@ function make_particle(pdgId, r0){
     case  431: return new       Ds_object( 1, r0) ; break ;
     case -431: return new       Ds_object(-1, r0) ; break ;
     
+    case  413: return new    DStar_object( 1, r0) ; break ;
+    case -413: return new    DStar_object(-1, r0) ; break ;
+    case  423: return new   D0Star_object( 1, r0) ; break ;
+    case -423: return new   D0Star_object(-1, r0) ; break ;
+    case  433: return new   DsStar_object( 1, r0) ; break ;
+    case -433: return new   DsStar_object(-1, r0) ; break ;
+    
+    // Bottom mesons
+    case  511: return new       B0_object( 1, r0) ; break ;
+    case -511: return new       B0_object(-1, r0) ; break ;
+    case  521: return new        B_object( 1, r0) ; break ;
+    case -521: return new        B_object(-1, r0) ; break ;
+    case  531: return new       Bs_object( 1, r0) ; break ;
+    case -531: return new       Bs_object(-1, r0) ; break ;
+    
     // Charmonium
     case -441:
     case  441: return new     etaC_object(    r0) ; break ;
@@ -207,6 +222,9 @@ function rho0_object(r0){
     [1.0, [211,-211]]
   ] ;
   par.normalise_decays() ;
+  par.m = inverse_cauchy(Math.random()/(Math.PI*par.w), par.m, par.w) ;
+  var  E = Math.sqrt(par.m*par.m+par.p4_0.p()*par.p4_0.p()) ;
+  par.p4_0.t = E ;
   return par ;
 }
 
@@ -411,6 +429,37 @@ function D0_object(q, r0){
   return par ;
 }
 
+function DStar_object(q, r0){
+  var par = new particle_object(2007, q, r0, true) ;
+  par.color = generic_color ;
+  par.type = 'charged_hadron' ;
+  par.matter = q ;
+  par.w = 2.3 ;
+  par.pdgId = (q==1) ? 413 : -413 ;
+  par.decays = [ 
+    [0.619, [421,111]] ,
+    [0.381, [421,22]] ,
+  ] ;
+  par.normalise_decays() ;
+  return par ;
+}
+
+function D0Star_object(q, r0){
+  var par = new particle_object(2010, 0, r0, true) ;
+  par.color = generic_color ;
+  par.type = 'neutral_hadron' ;
+  par.matter = q ;
+  par.w = 0.096 ;
+  par.pdgId = (q==1) ? 423 : -423 ;
+  par.decays = [ 
+    [0.677, [421,211]] ,
+    [0.307, [411,111]] ,
+    [0.016, [411,22]]
+  ] ;
+  par.normalise_decays() ;
+  return par ;
+}
+
 function Ds_object(q, r0){
   var par = new particle_object(1969, q, r0, true) ;
   par.color = generic_color ;
@@ -438,10 +487,158 @@ function Ds_object(q, r0){
     [0.010, [321,310,211-211]] ,
     [0.009, [321,-321,211,-211,211]]
   ] ;
+  par.normalise_decays() ;
+  return par ;
+}
+
+function DsStar_object(q, r0){
+  var par = new particle_object(2112, q, r0, true) ;
+  par.color = generic_color ;
+  par.type = 'charged_hadron' ;
+  par.matter = q ;
+  par.w = 1.9 ;
+  par.pdgId = (q==1) ? 433 : -433 ;
+  par.decays = [ 
+    [0.942, [431,22]] ,
+    [0.058, [431,111]]
+  ] ;
+  par.normalise_decays() ;
+  return par ;
+}
+
+// Bottom mesons
+function B_object(q, r0){
+  var par = new particle_object(5279, q, r0, true) ;
+  par.color = generic_color ;
+  par.type = 'charged_hadron' ;
+  par.matter = q ;
+  par.w = 1e-20 ;
+  par.tau = 1.64e-12 ;
+  par.pdgId = (q==1) ? -521 : 521 ;
+  par.decays = [ 
+    [0.022, [-421,-11,19]] ,
+    [0.022, [-421,-13,19]] ,
+    [0.008, [-421,-15,19]] ,
+    [0.057, [-423,-11,19]] ,
+    [0.057, [-423,-13,19]] ,
+    [0.019, [-423,-15,19]] ,
+    [0.002, [-411,211,-11,19]] ,
+    [0.002, [-411,211,-13,19]] ,
+    [0.0001,[-15,19]] ,
+    [0.005, [-421,211]] ,
+    [0.013, [-421,213]] ,
+    [0.006, [-421,211,211,-211]] ,
+    [0.006, [-421,223,-211]] ,
+    [0.001, [-411,221,211]] ,
+    [0.005, [-423,211]] ,
+    [0.005, [-423,223,211]] ,
+    [0.010, [-423,213]] ,
+    [0.002, [-423,321,313]] ,
+    [0.010, [-423,221,221,-211]] ,
+    [0.018, [-423,221,221,-211,111]] ,
+    [0.006, [-423,221,221,211,-211,-211]] ,
+    [0.003, [-413,211,221,221,-211]] ,
+    [0.010, [-423,431]] ,
+    [0.008, [-421,433]] ,
+    [0.008, [-423,431]] ,
+    [0.017, [-423,433]] ,
+    [0.002, [-423,411,311]] ,
+    [0.004, [-421,433,311]] ,
+    [0.009, [-423,433,311]] ,
+    [0.001, [-421,421,-321]] ,
+    [0.002, [-423,421,-321]] ,
+    [0.011, [-421,423,-321]] ,
+    [0.001, [-413,413,-321]] ,
+    [0.001, [441,323]] ,
+    [0.001, [443,-321]] ,
+    [0.001, [443,-323]]
+  ] ;
+  par.normalise_decays() ;
+  return par ;
+}
+
+function B0_object(q, r0){
+  var par = new particle_object(5280, q, r0, true) ;
+  par.color = generic_color ;
+  par.type = 'charged_hadron' ;
+  par.matter = q ;
+  par.w = 1e-20 ;
+  par.tau = 5.0e-13 ;
+  par.pdgId = (q==1) ? 511 : -511 ;
+  par.decays = [ 
+    [0.006, [-13,19]] ,
+    [0.054, [-15,19]] ,
+    [0.025, [333,-11,19]] ,
+    [0.025, [333,-13,19]] ,
+    [0.027, [221,-11,19]] ,
+    [0.010, [331,-11,19]] ,
+    [0.027, [221,-13,19]] ,
+    [0.010, [331,-13,19]] ,
+    [0.010, [311,-13,19]] ,
+    [0.010, [313,-13,19]] ,
+    [0.015, [310,321]] ,
+    [0.045, [333,211]] ,
+    [0.054, [323,311]] ,
+    [0.084, [333,213]] ,
+    [0.072, [313,323]] ,
+    [0.010, [321,310,211-211]] ,
+    [0.009, [321,-321,211,-211,211]]
+  ] ;
   par.decays = [ [0.045, [333,211]] ] ;
   par.normalise_decays() ;
   return par ;
 }
+
+function Bs_object(q, r0){
+  var par = new particle_object(1969, q, r0, true) ;
+  par.color = generic_color ;
+  par.type = 'charged_hadron' ;
+  par.matter = q ;
+  par.w = 1e-20 ;
+  par.tau = 5.0e-13 ;
+  par.pdgId = (q==1) ? 531 : -531 ;
+  par.decays = [ 
+    [0.006, [-13,19]] ,
+    [0.054, [-15,19]] ,
+    [0.025, [333,-11,19]] ,
+    [0.025, [333,-13,19]] ,
+    [0.027, [221,-11,19]] ,
+    [0.010, [331,-11,19]] ,
+    [0.027, [221,-13,19]] ,
+    [0.010, [331,-13,19]] ,
+    [0.010, [311,-13,19]] ,
+    [0.010, [313,-13,19]] ,
+    [0.015, [310,321]] ,
+    [0.045, [333,211]] ,
+    [0.054, [323,311]] ,
+    [0.084, [333,213]] ,
+    [0.072, [313,323]] ,
+    [0.010, [321,310,211-211]] ,
+    [0.009, [321,-321,211,-211,211]]
+  ] ;
+  par.decays = [ [0.045, [333,211]] ] ;
+  par.normalise_decays() ;
+  return par ;
+}
+
+function Bc_object(q, r0){
+  var par = new particle_object(1969, q, r0, true) ;
+  par.color = generic_color ;
+  par.type = 'charged_hadron' ;
+  par.matter = q ;
+  par.w = 1e-20 ;
+  par.tau = 5.0e-13 ;
+  par.pdgId = (q==1) ? 541 : -541 ;
+  par.decays = [ 
+    [0.006, [-13,19]] 
+  ] ;
+  par.decays = [ [0.045, [333,211]] ] ;
+  par.normalise_decays() ;
+  return par ;
+}
+
+
+
 
 // Quarkonia
 function etaC_object(r0){
@@ -496,12 +693,15 @@ function virtual_photon_object(r0, m){
   par.matter = 0 ;
   par.w = 1e-20 ;
   par.pdgId = 0 ;
-  par.decays = [
-  [0.25, [421, -421]] ,
-  [0.25, [411, -411]] ,
-  [0.25, [431, -431]] ,
-  [0.25, [15,   -15]] ,
-  [0.01, [443,   22]]
+  par.decays = [ // BaBar physics book values
+    [1.04*0.5  , [511, -511]] ,
+    [1.04*0.5  , [521, -521]] ,
+    [0.94      , [ 15,  -15]] ,
+    [1.30      , [  4,   -4]] ,
+    [0.35      , [  3,   -3]] ,
+    [1.39      , [  2,   -2]] ,
+    [0.35      , [  1,   -1]] ,
+    [0.1       , [443,   22]] // Arbitrary value for lulz
   ] ;
   par.normalise_decays() ;
   return par ;

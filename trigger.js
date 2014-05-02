@@ -1,3 +1,9 @@
+function BaBar_trigger_object(){
+  this.analyse_particles = function(particles){
+    return true ;
+  }
+}
+
 function gg_trigger_object(){
   this.analyse_particles = function(particles){
     var n_g = 0 ;

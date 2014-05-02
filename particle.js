@@ -66,23 +66,78 @@ function particle_object(m, q, r0, unstable){
     return this.daughters ;
   }
   this.decay_recursive = function(m){
-    //if(this.daughters.length>0) this.daughters = [] ; //return [] ; // For some reason it sometimes tries to decay particles twice
+    if(this.pdgId==999){
+      for(var i=0 ; i<this.daughters.length ; i++){
+        this.daughters[i].decay_recursive(this.daughters[i].m) ;
+      }
+      this.daughters = multibody_decay(this.pdgId, this.p4_0, this.daughters, 0) ;
+      return ;
+    }
     if(this.decays.length==0) return [] ;
     var pdgIds = this.choose_random_decay() ;
     if(pdgIds==null) return [] ;
+    
+    var n_jets = 0 ;
+    var n_q    = 0 ;
+    var n_qbar = 0 ;
+    var jet_indices = [] ;
+    var remaining_mass = m ;
+    var r0 = this.r_0 ;
     for(var i=0 ; i<pdgIds.length ; i++){
-      var r0 = this.r_0 ;
-      var particle = make_particle(pdgIds[i], [r0.x, r0.y, r0.z]) ;
-      if(particle){
-        particle.mother = this ;
-        this.daughters.push(particle) ;
+      if(Math.abs(pdgIds[i])>0 && Math.abs(pdgIds[i])<10){
+        n_jets++ ;
+        jet_indices.push(i) ;
+        if(pdgIds[i]>0){
+          n_q++ ;
+        }
+        else{
+          n_qbar++ ;
+        }
+      }
+      else{
+        var particle = make_particle(pdgIds[i], [r0.x, r0.y, r0.z]) ;
+        if(particle){
+          particle.mother = this ;
+          this.daughters.push(particle) ;
+          remaining_mass -= particle.p4_0.m() ;
+        }
       }
     }
+    var jet_quarks = [] ;
+    var jet_m0s    = [] ;
+    if(n_jets%2==0){
+      // Phew, all balanced jets!
+      var n_qq = n_jets/2 ;
+      var quark_pairs = [] ;
+      for(var i=0 ; i<n_qq ; i++){
+        var q = choose_qq_pair(m_ss+100) ;
+        quark_pairs.push(q) ;
+        quark_pairs.push(q) ;
+      }
+      for(var i=0 ; i<jet_indices.length ; i++){
+        var q1 = pdgIds[jet_indices[i]]
+        var q2 = (q1>0) ? -quark_pairs[i] : quark_pairs[i] ;
+        jet_quarks.push([ q1 , q2 ]) ;
+        jet_m0s.push(quark_pair_mass(q1, q2)) ;
+      }
+    }
+    for(var i=0 ; i<jet_quarks.length ; i++){
+      var success = false ;
+      while(success==false){
+        var jet = new jet_object(jet_quarks[i][0], jet_quarks[i][1], [r0.x, r0.y, r0.z], 0, 0, 0, remaining_mass*0.5) ;
+        if(jet.is_valid==true){
+          success = true ;
+          jet.mother = this ;
+          this.daughters.push(jet) ;
+          remaining_mass -= jet.p4_0.m() ;
+        }
+      }
+    }
+    
     this.daughters = multibody_decay(this.pdgId, this.p4_0, this.daughters, 0) ;
     
     // This bit needs sorting into a heirachy
     for(var i=0 ; i<this.daughters.length ; i++){
-      //this.daughters = this.daughters.concat(this.daughters[i].decay_recursive(this.daughters[i].m)) ;
       this.daughters[i].decay_recursive(this.daughters[i].m) ;
     }
     return this.daughters ;
@@ -122,6 +177,14 @@ function recursively_decay_daughters(particle){
   }
 }
 
+function recursively_boost_daughters(particle, b){
+  particle.p4_0.boost(b) ;
+  for(var i=0 ; i<particle.daughters.length ; i++){
+    recursively_boost_daughters(particle.daughters[i], b) ;
+  }
+  return ;
+}
+
 function recursively_displace(particle, dx, dy, dz){
     for(var i=0 ; i<particle.daughters.length ; i++){
       var d = particle.daughters[i] ;
@@ -154,23 +217,6 @@ function recursively_displace(particle, dx, dy, dz){
 function multibody_decay(pdgId, p4, daughters, depth){
   if(daughters.length==0) return [] ;
   
-  // Format string to show what's going on
-  var n_padding = 5 ;
-  n_padding -= pdgId.length ;
-  var padding = '' ;
-  for(var i=0 ; i<n_padding ; i++){
-    padding += ' ' ;
-  }
-  var prefix = '' ;
-  for(var i=0 ; i<depth ; i++){
-    prefix = prefix + '  ' ;
-  }
-  var string = padding + pdgId + ' : ' + prefix ;
-  for(var i=0 ; i<daughters.length ; i++){
-    string = string + ' ' + daughters[i].pdgId ;
-  }
-  //Get('pre_info').innerHTML += '\n' + string ;
-  
   if(daughters.length==1){
     var m2 = daughters[0].p4_0.m2() ;
     var p2 = p4.x*p4.x+p4.y*p4.y+p4.z*p4.z ;
@@ -194,11 +240,14 @@ function multibody_decay(pdgId, p4, daughters, depth){
   
   // Choose a random momentum for the first daughter
   var mbar = 0 ;
-  for(var i=0 ; i<daughters.length ; i++){ mbar += daughters[i].p4_0.m() ; }
+  if(!d.p4_0) alert(pdgId + ' ' + d.pdgId) ;
+  for(var i=0 ; i<daughters.length ; i++){
+    if(!daughters[i].p4_0) alert(pdgId + ' ' + daughters[i].pdgId + ' = ' + daughters[i].pdgId) ;
+    mbar += daughters[i].p4_0.m() ;
+  }
   var mi = d.p4_0.m() ;
   var pmax = momentum_two_body_decay(m, mi, mbar) ;
   var p = (daughters.length==1) ? pmax : 0.9*Math.random()*pmax ;
-  //if(daughters.length==1) alert(m + ' ' + mi + ' ' + mbar + ' ' + pmax) ;
   
   // Make the three vectors and boost the first daughter in one direction, and the rest in the other
   var p3 = random_threeVector(p) ;
@@ -219,16 +268,8 @@ function multibody_decay(pdgId, p4, daughters, depth){
   daughters = multibody_decay(-1, p4_out, daughters, depth+1) ;
   daughters.push(d) ;
   
-  var px = 0 ;
-  var py = 0 ;
-  var pz = 0 ;
-  var E  = 0 ;
   for(var i=0 ; i<daughters.length ; i++){
     daughters[i].p4_0 = daughters[i].p4_0.boost(bv) ;
-    px += daughters[i].p4_0.x ;
-    py += daughters[i].p4_0.y ;
-    pz += daughters[i].p4_0.z ;
-    E  += daughters[i].p4_0.t ;
   }
   return daughters ;
 }

@@ -2,9 +2,16 @@ function keyDown(evt){
   var keyDownID = window.event ? event.keyCode : (evt.keyCode != 0 ? evt.keyCode : evt.which) ;
   if(keyDownID==8) evt.preventDefault ;
   switch(keyDownID){
-    case 32:
+    case 32: // Space
       evt.preventDefault() ;
       pause = !pause ;
+      one_event = false ;
+      break ;
+    case 39: // Right
+      evt.preventDefault() ;
+      pause = false ;
+      one_event = true ;
+      break ;
   }
 }
 
