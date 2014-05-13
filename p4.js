@@ -13,11 +13,12 @@ function threeVector(){
   this.z = 0 ;
   
   // Supplemental representation
-  this.r2 = function(){ return Math.pow(this.x,2) + Math.pow(this.y,2) + Math.pow(this.z,2) ; }
-  this.r  = function(){ return Math.sqrt( this.r2() ) ; }
-  this.phi   = function(){ return Math.atan2(this.y,this.x) ; }
-  this.theta = function(){ return Math.acos(this.z/this.r) ; }
-  this.eta   = function(){ return -Math.log(Math.tan(this.theta()*0.5)) ; }
+  this.r2    = function(){ return pow(this.x,2) + pow(this.y,2) + pow(this.z,2) ; }
+  this.r     = function(){ return sqrt( this.r2() ) ; }
+  this.d0    = function(){ return sqrt( pow(this.x,2) + pow(this.y,2) ) ; }
+  this.phi   = function(){ return atan2(this.y,this.x) ; }
+  this.theta = function(){ return acos(this.z/this.r) ; }
+  this.eta   = function(){ return -log(tan(this.theta()*0.5)) ; }
   
   this.add = function(p3_in, dir){
     var d = 1 ;
@@ -45,8 +46,11 @@ function threeVector(){
     p3_out.z = this.x*p3_in.y - this.y*p3_in.x ;
     return p3_out ;
   }
+  this.cos_angle_vector = function(p3_in){
+    return this.dot(p3_in)/(this.r()*p3_in.r()) ;
+  }
   this.angle_vector = function(p3_in){
-    return Math.acos(this.dot(p3_in)/(this.r()*p3_in.r())) ;
+    return acos(this.dot(p3_in)/(this.r()*p3_in.r())) ;
   }
   this.alert = function(){
     var string = '' ;
@@ -66,11 +70,11 @@ function fourVector(){
   this.p3_ = new threeVector() ;
   
   // Supplemental representation
-  this.r2 = function(){ return Math.pow(this.x,2) + Math.pow(this.y,2) + Math.pow(this.z,2) ; }
-  this.r  = function(){ return Math.sqrt( this.r2() ) ; }
-  this.phi   = function(){ return Math.atan2(this.y,this.x) ; }
-  this.theta = function(){ return Math.acos(this.z/this.r) ; }
-  this.eta   = function(){ return -Math.log(Math.tan(this.theta()*0.5)) ; }
+  this.r2    = function(){ return pow(this.x,2) + pow(this.y,2) + pow(this.z,2) ; }
+  this.r     = function(){ return sqrt( this.r2() ) ; }
+  this.phi   = function(){ return atan2(this.y,this.x) ; }
+  this.theta = function(){ return acos(this.z/this.r) ; }
+  this.eta   = function(){ return -log(tan(this.theta()*0.5)) ; }
   
   this.p3 = function(){
     // Update and return the three vector (rather than making a new three vector)
@@ -84,15 +88,15 @@ function fourVector(){
   this.px = function(){ return this.x ; }
   this.py = function(){ return this.y ; }
   this.pz = function(){ return this.z ; }
-  this.pT = function(){ return Math.sqrt(this.x*this.x+this.y*this.y) ; }
-  this.p2 = function(){ return Math.pow(this.px(),2) + Math.pow(this.py(),2) + Math.pow(this.pz(),2) ; }
-  this.p  = function(){ return Math.sqrt( this.p2() ) ; }
+  this.pT = function(){ return sqrt(this.x*this.x+this.y*this.y) ; }
+  this.p2 = function(){ return pow(this.px(),2) + pow(this.py(),2) + pow(this.pz(),2) ; }
+  this.p  = function(){ return sqrt( this.p2() ) ; }
   this.E  = function(){ return this.t ; }
-  this.m2 = function(){ return Math.pow(this.E(),2) - Math.pow(this.p(),2) ; }
+  this.m2 = function(){ return pow(this.E(),2) - pow(this.p(),2) ; }
   this.m  = function(){
     var m2 = this.m2() ;
-    if(m2<0) return -Math.sqrt(-m2) ;
-    return Math.sqrt(m2) ;
+    if(m2<0) return -sqrt(-m2) ;
+    return sqrt(m2) ;
   }
   this.g  = function(){ return   this.E()/this.m() ; }
   this.b  = function(){ return   this.p()/this.E() ; }
@@ -118,16 +122,15 @@ function fourVector(){
       }
     }
     // Inspired by the TLorentzVector method
-    var p4_out = new fourVector() ;
     var b2 = boost.r2() ;
-    var g  = 1.0/Math.sqrt(1-b2) ;
+    var g  = 1.0/sqrt(1-b2) ;
     var g2 = (b2>0) ? (g-1)/b2 : 0 ;
     var bp = boost.dot(this.p3()) ;
-    p4_out.x = this.x + g2*bp*boost.x + g*boost.x*this.t ;
-    p4_out.y = this.y + g2*bp*boost.y + g*boost.y*this.t ;
-    p4_out.z = this.z + g2*bp*boost.z + g*boost.z*this.t ;
-    p4_out.t = this.t*g + g*bp ;
-    return p4_out ;
+    this.x = this.x + g2*bp*boost.x + g*boost.x*this.t ;
+    this.y = this.y + g2*bp*boost.y + g*boost.y*this.t ;
+    this.z = this.z + g2*bp*boost.z + g*boost.z*this.t ;
+    this.t = this.t*g + g*bp ;
+    return this ;
   }
   this.boostVector = function(){
     var boost = new threeVector() ;
@@ -150,16 +153,64 @@ function fourVector(){
 }
 
 function momentum_two_body_decay(M, m1, m2){
-  return Math.sqrt((M*M-(m1+m2)*(m1+m2))*(M*M-(m1-m2)*(m1-m2)))/(2*M) ;
+  return sqrt((M*M-(m1+m2)*(m1+m2))*(M*M-(m1-m2)*(m1-m2)))/(2*M) ;
 }
 function random_threeVector(p){
   var phi_theta = random_phi_theta() ;
   var phi   = phi_theta[0] ;
   var theta = phi_theta[1] ;
   
-  var px = p*Math.sin(theta)*Math.cos(phi) ;
-  var py = p*Math.sin(theta)*Math.sin(phi) ;
-  var pz = p*Math.cos(theta) ;
+  var px = p*sin(theta)*cos(phi) ;
+  var py = p*sin(theta)*sin(phi) ;
+  var pz = p*cos(theta) ;
   return[px,py,pz] ;
+}
+
+function rotate_theta_phi(v, theta, phi){
+  var v3_out = new threeVector() ;
+  var ct = cos(theta) ;
+  var st = sin(theta) ;
+  var cp = cos(phi) ;
+  var sp = sin(phi) ;
+  v3_out.x =  ct*cp*v.x + ct*sp*v.y + st*v.z ;
+  v3_out.y = -   sp*v.x +    cp*v.y          ;
+  v3_out.z = -st*cp*v.x - st*sp*v.y + ct*v.z ;
+  return v3_out ;
+}
+
+function random_gaussian(sigma){
+  return sqrt( -2*sigma*log(random() ) ) ;
+}
+
+function random_boost(b){
+  var phi_theta = random_phi_theta() ;
+  var phi   = phi_theta[0] ;
+  var theta = phi_theta[1] ;
+  var p = b ;
+  var E = 1 ;
+  var p4 = new fourVector() ;
+  p4.x = p*sin(theta)*cos(phi) ;
+  p4.y = p*sin(theta)*sin(phi) ;
+  p4.z = p*cos(theta) ;
+  p4.t = E ;
+  var boost = p4.boostVector() ;
+  return boost ;
+}
+
+function cauchy(x, m, w){
+  return w/(pi*(pow(x-m,2)+w*w)) ;
+}
+function inverse_cauchy(y, m, w){
+  var d = w/(pi*y) - w*w ;
+  if(d<0) d = -d ;
+  var dm = sqrt(d) ;
+  if(random()<0.5) dm = -dm ;
+  return m + dm ;
+}
+
+function random_phi_theta(){
+  var phi   = random()*pi*2 ;
+  var theta = acos(-1+2*random()) ;
+  return [phi,theta] ;
 }
 

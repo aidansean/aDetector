@@ -1,3 +1,4 @@
+// Simple wrapper to keep track of event info 
 function event_container(particles){
   this.particles = particles ;
   

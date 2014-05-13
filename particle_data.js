@@ -40,14 +40,14 @@ function make_particle(pdgId, r0){
     case -130:
     case  130: return new       KL_object(    r0) ; break ;
     
-    case  323: return new     K892_object(-1, r0) ; break ;
+    case  323: return new     K892_object( 1, r0) ; break ;
     case -323: return new     K892_object(-1, r0) ; break ;
     case  313: return new   K892_0_object( 1, r0) ; break ;
     case -313: return new   K892_0_object(-1, r0) ; break ;
     
     case  311:
     case -311:
-      if(Math.random()<0.5){ return new KS_object(r0) ; break ; }
+      if(random()<0.5){ return new KS_object(r0) ; break ; }
       return new KL_object(r0) ; break ;
     
     // Charmed mesons
@@ -89,12 +89,13 @@ function make_particle(pdgId, r0){
 //Colors
 var generic_color  = '255,255,255' ;
 var kaon_color     = '255,  0,255' ;
-var pion_color     = '150,150,  0' ;
+var pion_color     = '250,250,  0' ;
 var photon_color   = '255,100,100' ;
 var electron_color = '  0,255,255' ;
 var muon_color     = '  0,255,  0' ;
-var tau_color      = '100,100,100' ;
+var tau_color      = '200,200,200' ;
 var neutrino_color = '  0,  0,  0' ;
+var proton_color   = ' 50,100,250' ;
 
 // Try to follow the same order as the PDG
 
@@ -173,11 +174,12 @@ function pi0_object(r0){
   par.color = generic_color ;
   par.type = 'neutral_hadron' ;
   par.matter = 0 ;
-  par.w = 1e-20 ;
+  par.w = 7.2e-6 ;
   par.pdgId = 111 ;
   par.decays = [
     [0.99, [22,22]    ] ,
-    [0.01, [11,-11,22]]
+    [0.01, [11,-11,22]] ,
+    [3e-5, [11,-11,11,-11]]
   ] ;
   par.normalise_decays() ;
   return par ;
@@ -202,12 +204,13 @@ function rho_object(q, r0){
   par.w = 150.0 ;
   par.pdgId = 213 ;
   par.decays = [
-    [1.0, [211,111]]
+    [1.0    , [211,111]] ,
+    [0.00045, [211, 22]]
   ] ;
   par.normalise_decays() ;
-  par.m = inverse_cauchy(Math.random()/(Math.PI*par.w), par.m, par.w) ;
-  var  E = Math.sqrt(par.m*par.m+par.p4_0.p()*par.p4_0.p()) ;
-  par.p4_0.t = E ;
+  //par.m = max(300,inverse_cauchy(random()/(pi*par.w), par.m, par.w)) ;
+  //var  E = sqrt(par.m*par.m+par.p4_0.p()*par.p4_0.p()) ;
+  //par.p4_0.t = E ;
   return par ;
 }
 
@@ -219,12 +222,17 @@ function rho0_object(r0){
   par.w = 150.0 ;
   par.pdgId = 113 ;
   par.decays = [
-    [1.0, [211,-211]]
+    [1.000  , [211,-211]] ,
+    [0.099  , [211,-211,22]] ,
+    [0.0003 , [221,22]] ,
+    [0.00005, [11,-11]] ,
+    [0.00005, [13,-13]] ,
+    [0.0001 , [211,-211,111]] ,
   ] ;
   par.normalise_decays() ;
-  par.m = inverse_cauchy(Math.random()/(Math.PI*par.w), par.m, par.w) ;
-  var  E = Math.sqrt(par.m*par.m+par.p4_0.p()*par.p4_0.p()) ;
-  par.p4_0.t = E ;
+  //par.m = max(300,inverse_cauchy(random()/(pi*par.w), par.m, par.w)) ; // Protect against very low mass values!
+  //var  E = sqrt(par.m*par.m+par.p4_0.p()*par.p4_0.p()) ;
+  //par.p4_0.t = E ;
   return par ;
 }
 
@@ -233,16 +241,20 @@ function eta_object(r0){
   par.color = generic_color ;
   par.type = 'neutral_hadron' ;
   par.matter = 0 ;
-  par.w = 0.1 ;
+  par.w = 0.001 ;
   par.pdgId = 221 ;
   par.decays = [
     [0.394, [22,22]] ,
     [0.327, [111, 111,111]] ,
     [0.229, [211,-211,111]] ,
     [0.042, [211,-211,22]]  ,
-    [0.007, [11,-11,22]]
+    [0.007, [11,-11,22]] ,
+    [0.00002, [11,-11,11,-11]]
   ] ;
-  par.normalise_decays() ;
+  //par.normalise_decays() ;
+  //par.m = inverse_cauchy(1.2*random()/(pi*par.w), par.m, par.w) ;
+  var  E = sqrt(par.m*par.m+par.p4_0.p()*par.p4_0.p()) ;
+  //par.p4_0.t = E ;
   return par ;
 }
 
@@ -262,6 +274,9 @@ function etap_object(r0){
     [0.002, [211,-211,11,-11]]
   ] ;
   par.normalise_decays() ;
+  //par.m = inverse_cauchy(1.2*random()/(pi*par.w), par.m, par.w) ;
+  //var  E = sqrt(par.m*par.m+par.p4_0.p()*par.p4_0.p()) ;
+  //par.p4_0.t = E ;
   return par ;
 }
 
@@ -278,6 +293,9 @@ function omega_object(r0){
     [0.015, [211,-211]]
   ] ;
   par.normalise_decays() ;
+  //par.m = inverse_cauchy(1.2*random()/(pi*par.w), par.m, par.w) ;
+  //var  E = sqrt(par.m*par.m+par.p4_0.p()*par.p4_0.p()) ;
+  //par.p4_0.t = E ;
   return par ;
 }
 
@@ -295,9 +313,9 @@ function phi_object(r0){
     [0.013, [221,22]]
   ] ;
   par.normalise_decays() ;
-  par.m = inverse_cauchy(1.2*Math.random()/(Math.PI*par.w), par.m, par.w) ;
-  var  E = Math.sqrt(par.m*par.m+par.p4_0.p()*par.p4_0.p()) ;
-  par.p4_0.t = E ;
+  //par.m = max(1000,inverse_cauchy(1.2*random()/(pi*par.w), par.m, par.w)) ;
+  //var  E = sqrt(par.m*par.m+par.p4_0.p()*par.p4_0.p()) ;
+  //par.p4_0.t = E ;
   return par ;
 }
 
@@ -308,7 +326,7 @@ function K_object(q, r0){
   par.type = 'charged_hadron' ;
   par.matter = -q ;
   par.w = 1e-20 ;
-  par.pdgId = (q==1) ? -321 : 321 ;
+  par.pdgId = (q==1) ? 321 : -321 ;
   par.decays = [] ;
   par.normalise_decays() ;
   return par;
@@ -323,7 +341,9 @@ function KS_object(r0){
   par.tau = 8.95e-11 ;
   par.pdgId = 310 ;
   par.decays = [
-    [1.0,[211,-211]]
+    [0.307,[111, 111]] ,
+    [0.692,[211,-211]] ,
+    [0.002,[211,-211,22]]
   ] ;
   par.normalise_decays() ;
   return par ;
@@ -338,7 +358,17 @@ function KL_object(r0){
   par.tau = 5.12e-8 ;
   par.pdgId = 130 ;
   par.decays = [
-    [1.0,[211,-211,111]]
+    [0.406*0.5,[ 211, 11,-19]] ,
+    [0.406*0.5,[-211,-11, 19]] ,
+    [0.270*0.5,[ 211, 13,-19]] ,
+    [0.270*0.5,[-211,-13, 19]] ,
+    [0.002*0.5,[ 211, 11,-19,22]] ,
+    [0.002*0.5,[-211,-11, 19,22]] ,
+    [0.003*0.5,[ 211, 13,-19,22]] ,
+    [0.003*0.5,[-211,-13, 19,22]] ,
+    [0.195,[111, 111,111]] ,
+    [0.125,[211,-211,111]] ,
+    [0.002,[211,-211]]
   ] ;
   return par ;
 }
@@ -349,14 +379,17 @@ function K892_object(q, r0){
   par.type = 'charged_hadron' ;
   par.matter = -q ;
   par.w = 50.8*0.5 ;
-  par.pdgId = (q==1) ? -323 : 323 ;
+  par.pdgId = (q==1) ? 323 : -323 ;
   par.decays = [
-    [1, [321,111]]
+    [0.50, [321,111]] ,
+    [0.50, [311,211]] ,
+    [0.01, [321,22]]
   ] ;
   par.normalise_decays() ;
-  par.m = inverse_cauchy(Math.random()/(Math.PI*par.w), par.m, par.w) ;
-  var  E = Math.sqrt(par.m*par.m+par.p4_0.p()*par.p4_0.p()) ;
-  par.p4_0.t = E ;
+  //par.m = max(650,inverse_cauchy(random()/(pi*par.w), par.m, par.w)) ;
+  //par.m = min(1100,par.m) ;
+  //var  E = sqrt(par.m*par.m+par.p4_0.p()*par.p4_0.p()) ;
+  //par.p4_0.t = E ;
   return par;
 }
 
@@ -364,16 +397,18 @@ function K892_0_object(q, r0){
   var par = new particle_object(892, 0, r0, true) ;
   par.color = kaon_color ;
   par.type = 'charged_hadron' ;
-  par.matter = -q ;
-  par.w = 26.2*0.5 ;
-  par.pdgId = (q==1) ? -313 : 313 ;
+  par.matter = q ;
+  par.w = 26.2*0.05 ;
+  par.pdgId = (q==1) ? 313 : -313 ;
   par.decays = [
-    [1, [321,-211]]
+    [0.5, [321,-211]] ,
+    [0.5, [311, 111]]
   ] ;
   par.normalise_decays() ;
-  par.m = inverse_cauchy(Math.random()/(Math.PI*par.w), par.m, par.w) ;
-  var  E = Math.sqrt(par.m*par.m+par.p4_0.p()*par.p4_0.p()) ;
-  par.p4_0.t = E ;
+  //par.m = max(650,inverse_cauchy(random()/(pi*par.w), par.m, par.w)) ;
+  //par.m = min(1100,par.m) ;
+  //var  E = sqrt(par.m*par.m+par.p4_0.p()*par.p4_0.p()) ;
+  //par.p4_0.t = E ;
   return par;
 }
 
@@ -386,7 +421,7 @@ function D_object(q, r0){
   par.w = 1e-20 ;
   par.tau = 1.04e-12 ;
   par.pdgId = (q==1) ? 411 : -411 ;
-  par.decays = [ 
+  par.decays = [
     [0.088, [310,-11,19]] ,
     [0.088, [310,-13,19]] ,
     [0.037, [313,-11,19]] ,
@@ -411,8 +446,8 @@ function D0_object(q, r0){
   par.tau = 4.1e-13 ;
   par.pdgId = (q==1) ? 421 : -421 ;
   par.decays = [ 
-    [0.036, [ 321,-11,19]] ,
-    [0.022, [ 321,-13,19]] ,
+    [0.036, [-321,-11,19]] ,
+    [0.022, [-321,-13,19]] ,
     [0.022, [ 313,-11,19]] ,
     [0.019, [ 313,-13,19]] ,
     [0.039, [-321,211]] ,
@@ -437,8 +472,8 @@ function DStar_object(q, r0){
   par.w = 2.3 ;
   par.pdgId = (q==1) ? 413 : -413 ;
   par.decays = [ 
-    [0.619, [421,111]] ,
-    [0.381, [421,22]] ,
+    [0.619, [411,111]] ,
+    [0.381, [411,22]] ,
   ] ;
   par.normalise_decays() ;
   return par ;
@@ -452,9 +487,9 @@ function D0Star_object(q, r0){
   par.w = 0.096 ;
   par.pdgId = (q==1) ? 423 : -423 ;
   par.decays = [ 
-    [0.677, [421,211]] ,
-    [0.307, [411,111]] ,
-    [0.016, [411,22]]
+    [0.677, [411,211]] ,
+    [0.307, [421,111]] ,
+    [0.016, [421,22]]
   ] ;
   par.normalise_decays() ;
   return par ;
@@ -481,10 +516,10 @@ function Ds_object(q, r0){
     [0.010, [313,-13,19]] ,
     [0.015, [310,321]] ,
     [0.045, [333,211]] ,
-    [0.054, [323,311]] ,
+    [0.054, [323,-311]] ,
     [0.084, [333,213]] ,
-    [0.072, [313,323]] ,
-    [0.010, [321,310,211-211]] ,
+    [0.072, [-313,323]] ,
+    [0.010, [321,310,211,-211]] ,
     [0.009, [321,-321,211,-211,211]]
   ] ;
   par.normalise_decays() ;
@@ -566,25 +601,36 @@ function B0_object(q, r0){
   par.tau = 5.0e-13 ;
   par.pdgId = (q==1) ? 511 : -511 ;
   par.decays = [ 
-    [0.006, [-13,19]] ,
-    [0.054, [-15,19]] ,
-    [0.025, [333,-11,19]] ,
-    [0.025, [333,-13,19]] ,
-    [0.027, [221,-11,19]] ,
-    [0.010, [331,-11,19]] ,
-    [0.027, [221,-13,19]] ,
-    [0.010, [331,-13,19]] ,
-    [0.010, [311,-13,19]] ,
-    [0.010, [313,-13,19]] ,
-    [0.015, [310,321]] ,
-    [0.045, [333,211]] ,
-    [0.054, [323,311]] ,
-    [0.084, [333,213]] ,
-    [0.072, [313,323]] ,
-    [0.010, [321,310,211-211]] ,
-    [0.009, [321,-321,211,-211,211]]
+    [0.022, [-411,-11,19]] ,
+    [0.022, [-411,-13,19]] ,
+    [0.010, [-411,-15,19]] ,
+    [0.049, [-413,-11,19]] ,
+    [0.049, [-413,-13,19]] ,
+    [0.018, [-413,-15,19]] ,
+    [0.049, [-421,-211,-11,19]] ,
+    [0.049, [-421,-211,-13,19]] ,
+    [0.003, [-411,211]] ,
+    [0.008, [-411,213]] ,
+    [0.003, [-411,221,211]] ,
+    [0.004, [-411,211,221,-211]] ,
+    [0.001, [-411,211,113]] ,
+    [0.006, [-413,211,113]] ,
+    [0.003, [-413,221,211]] ,
+    [0.007, [-411,431]] ,
+    [0.008, [-413,431]] ,
+    [0.007, [-411,433]] ,
+    [0.018, [-413,433]] ,
+    [0.001, [-411,421,321]] ,
+    [0.004, [-411,423,321]] ,
+    [0.003, [-413,421,321]] ,
+    [0.001, [-413,423,321]] ,
+    [0.003, [-411,413,311]] ,
+    [0.003, [-413,411,311]] ,
+    [0.008, [-413,413,311]] ,
+    [0.002, [-423,423,311]] ,
+    [0.001, [443,313]] ,
+    [0.001, [443,311,211,-211]]
   ] ;
-  par.decays = [ [0.045, [333,211]] ] ;
   par.normalise_decays() ;
   return par ;
 }
@@ -659,8 +705,8 @@ function etaC_object(r0){
     [0.011, [-313,-313,211,-211]]
   ] ;
   par.normalise_decays() ;
-  par.m = inverse_cauchy(Math.random()/(Math.PI*par.w), par.m, par.w) ;
-  var  E = Math.sqrt(par.m*par.m+par.p4_0.p()*par.p4_0.p()) ;
+  par.m = inverse_cauchy(random()/(pi*par.w), par.m, par.w) ;
+  var  E = sqrt(par.m*par.m+par.p4_0.p()*par.p4_0.p()) ;
   par.p4_0.t = E ;
   return par ;
 }
@@ -675,12 +721,15 @@ function Jpsi_object(r0){
   par.y0 = cauchy(this.m, this.m, this.w) ;
   par.pdgId = 443 ;
   par.decays = [
-    [0.5, [11,-11]] ,
-    [0.5, [13,-13]]
+    [0.059, [11,-11]] ,
+    [0.059, [13,-13]] ,
+    [0.009, [11,-11,22]] ,
+    [0.009, [13,-13,22]] ,
+    
   ] ;
   par.normalise_decays() ;
-  par.m = inverse_cauchy(Math.random()/(Math.PI*par.w), par.m, par.w) ;
-  var  E = Math.sqrt(par.m*par.m+par.p4_0.p()*par.p4_0.p()) ;
+  par.m = inverse_cauchy(random()/(pi*par.w), par.m, par.w) ;
+  var  E = sqrt(par.m*par.m+par.p4_0.p()*par.p4_0.p()) ;
   par.p4_0.t = E ;
   return par ;
 }
@@ -694,14 +743,16 @@ function virtual_photon_object(r0, m){
   par.w = 1e-20 ;
   par.pdgId = 0 ;
   par.decays = [ // BaBar physics book values
-    [1.04*0.5  , [511, -511]] ,
-    [1.04*0.5  , [521, -521]] ,
-    [0.94      , [ 15,  -15]] ,
-    [1.30      , [  4,   -4]] ,
-    [0.35      , [  3,   -3]] ,
-    [1.39      , [  2,   -2]] ,
-    [0.35      , [  1,   -1]] ,
-    [0.1       , [443,   22]] // Arbitrary value for lulz
+    //[1.04*0.5  , [511, -511]] ,
+    //[1.04*0.5  , [521, -521]] ,
+    //[0.94      , [ 15,  -15]] ,
+    //[0.01      , [ 11,  -11, 22]] ,
+    //[0.01      , [ 13,  -13, 22]] ,
+    //[1.30      , [  4,   -4]] ,
+    [0.35      , [  3,   -3]] 
+    //[1.39      , [  2,   -2]] ,
+    //[0.35      , [  1,   -1]] 
+    //[0.1       , [443,   22]] // Arbitrary value for lulz
   ] ;
   par.normalise_decays() ;
   return par ;

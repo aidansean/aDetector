@@ -1,3 +1,13 @@
+th, td, input{
+  font : 10px arial , sans-serif ;
+}
+input.input_filter{
+  width : 50px ;
+}
+td.center{
+  text-align : center ;
+}
+
 div.tab     {
   display : table ;
   width : 750px ;
@@ -16,6 +26,9 @@ input#input_x, input#input_y, input#input_z, input#input_t, input#input_p{
   width : 40px ;
 }
 
+div#div_user_reco_wrapper, div#div_particle_lists{
+  padding : 5px ;
+}
 
 th.particle_color{
   width : 30px ;
@@ -45,3 +58,57 @@ th.particle_info, td.particle_info{
   font : 8pt arial , sans-serif ;
   text-align : left ;
 }
+
+
+table.particle_list{
+  width : 180px ;
+  border : 1px solid black ;
+  border-collapse : separate ;
+  background : white ;
+  float : left ;
+  margin : 5px ;
+}
+th.particle_list_header{
+  text-align : center ;
+  background : #ddddff ;
+}
+th.particle_list{ width :  80px ; }
+td.particle_list{ width : 100px ; }
+th.particle_list, td.particle_list{
+  font : 8pt arial , sans-serif ;
+}
+th.particle_list{
+  background : #eeeeee ;
+}
+td.particle_list{
+  background : #eeeeff ;
+}
+
+th.reco_particle_heading{
+  background : #ffcccc ;
+  text-align : center ;
+}
+
+table#reco_particle_first{
+  border-top : 1px solid black ;
+  margin-top : 5px ;
+}
+
+table.reco_particle{
+  width : 350px ;
+  margin : auto ;
+  padding : 2px ;
+  border-bottom : 1px solid black ;
+  border-left : 1px solid black ;
+  border-right : 1px solid black ;
+}
+
+hr.clearboth{
+  float : center ;
+  clear : both ;
+}
+
+pre#pre_info{
+  clear : both ;
+}
+
