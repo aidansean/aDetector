@@ -78,6 +78,24 @@ function update_coords(){
   draw_settings['cutaway'].p0 = p0 ;
 }
 
+function change_update_event_dsiplay_interval(){
+  var interval = parseInt(Get('input_update_event_display_interval').value) ;
+  if(isNaN(interval)) return ;
+  draw_interval = interval ;
+}
+
+function change_update_particle_table_interval(){
+  var interval = parseInt(Get('input_update_particle_table_interval').value) ;
+  if(isNaN(interval)) return ;
+  table_interval = interval ;
+}
+
+function change_save_events(){
+  var value = Get('select_save_events').value ;
+  if(value=='true' ) record_events = true ;
+  if(value=='false') record_events = false ;
+}
+
 function add_eventListeners(){
   document.addEventListener('keydown', keyDown) ;
   Get('submit_coords'  ).addEventListener('click', update_coords  ) ;
@@ -89,6 +107,10 @@ function add_eventListeners(){
   Get('submit_reco_particle_create'    ).addEventListener('click', make_new_reco_particle) ;
   Get('submit_reco_particle_addList'   ).addEventListener('click', add_reco_particle_collection_tr) ;
   Get('submit_reco_particle_removeList').addEventListener('click', remove_reco_particle_collection_tr) ;
+  
+  Get('submit_update_event_display_interval' ).addEventListener('click', change_update_event_dsiplay_interval ) ;
+  Get('submit_update_particle_table_interval').addEventListener('click', change_update_particle_table_interval) ;
+  Get('submit_update_save_events').addEventListener('click', change_save_events) ;
 }
 
 

@@ -8,7 +8,9 @@ function     cos(x){ return Math.cos(x)     ; }
 function     exp(x){ return Math.exp(x)     ; }
 function     log(x){ return Math.log(x)     ; }
 function     sin(x){ return Math.sin(x)     ; }
+function     tan(x){ return Math.tan(x)     ; }
 function    acos(x){ return Math.acos(x)    ; }
+function    atan(x){ return Math.atan(x)    ; }
 function    ceil(x){ return Math.ceil(x)    ; }
 function    sqrt(x){ return Math.sqrt(x)    ; }
 function   min(x,y){ return Math.min(x,y)   ; }

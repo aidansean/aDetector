@@ -91,6 +91,7 @@ function particle_object(m, q, r0, unstable){
   this.decay_top_level = function(m){
     this.daughters = [] ;
     this.decay_recursive(m) ;
+    this.daughters = multibody_decay(this.pdgId, this.p4_0, this.daughters, 0) ;
     this.post_decay_V0() ;
     return this.daughters ;
   }
@@ -137,15 +138,6 @@ function particle_object(m, q, r0, unstable){
     }
     // Bump up the mass by 50MeV if we need to
     if(remaining_mass<0){
-      // First check for the rhos, they cause most problems!
-      for(var i=0 ; i<pdgIds.length ; i++){
-        break ;
-        if(abs(pdgIds[i])==113 || abs(pdgIds[i])==213){
-          var m = this.daughters[i].m + remaining_mass - 50 ;
-          this.daughters[i].m = m ;
-          this.daughters[i].p4_0.t = sqrt(this.daughters[i].p4_0.p2() + m*m) ;
-        }
-      }
       this.m += (50-remaining_mass) ;
       m += (50-remaining_mass) ;
     }
@@ -173,7 +165,7 @@ function particle_object(m, q, r0, unstable){
       var c = 0 ;
       while(success==false && c<10){
         c++
-        var jet = new jet_object(jet_quarks[i][0], jet_quarks[i][1], [r0.x, r0.y, r0.z], 0, 0, 0, remaining_mass*0.5) ;
+        var jet = new jet_object(jet_quarks[i][0], jet_quarks[i][1], [r0.x, r0.y, r0.z], 0, 0, 0, remaining_mass*0.75) ;
         if(jet.is_valid==true){
           success = true ;
           jet.mother = this ;
@@ -182,8 +174,6 @@ function particle_object(m, q, r0, unstable){
         }
       }
     }
-    
-    this.daughters = multibody_decay(this.pdgId, this.p4_0, this.daughters, 0) ;
     
     // This bit needs sorting into a heirachy
     for(var i=0 ; i<this.daughters.length ; i++){
@@ -376,13 +366,16 @@ function recursively_displace(particle, dx, dy, dz){
       var c  = 3e8 ;
       var dr = bg*c*dt ;
       if(d.p4_0.r()>0){
-        var dx = dr*d.p4_0.x/d.p4_0.r() ;
-        var dy = dr*d.p4_0.y/d.p4_0.r() ;
-        var dz = dr*d.p4_0.z/d.p4_0.r() ;
-        d.r_decay = make_point(d.r_0.x+dx, d.r_0.y+dy, d.r_0.z+dz) ;
+        var dx_tmp = dx + dr*d.p4_0.x/d.p4_0.r() ;
+        var dy_tmp = dy + dr*d.p4_0.y/d.p4_0.r() ;
+        var dz_tmp = dz + dr*d.p4_0.z/d.p4_0.r() ;
+        d.r_decay = make_point(d.r_0.x+dx_tmp+dx, d.r_0.y+dy_tmp, d.r_0.z+dz_tmp) ;
       }
+     recursively_displace(d, dx_tmp, dy_tmp, dz_tmp) ; 
     }
-    recursively_displace(d, dx, dy, dz) ;
+    else{
+      recursively_displace(d, dx, dy, dz) ;
+    }
   }
 }
 
@@ -390,13 +383,15 @@ function multibody_decay(pdgId, p4, daughters, depth){
   if(daughters.length==0) return [] ;
   
   if(daughters.length==1){
-    var m2 = daughters[0].p4_0.m2() ;
+    var d = daughters[0] ;
+    if(d.pdgId!=999){ d.m = random_simple_truncated_cauchy(d.m, d.w, 0, p4.m()) ; }
     var p2 = p4.x*p4.x+p4.y*p4.y+p4.z*p4.z ;
-    var E  = sqrt(m2+p2) ;
-    daughters[0].p4_0.x = p4.x ;
-    daughters[0].p4_0.y = p4.y ;
-    daughters[0].p4_0.z = p4.z ;
-    daughters[0].p4_0.t = E ;
+    var E  = sqrt(d.m*d.m+p2) ;
+    d.p4_0.x = p4.x ;
+    d.p4_0.y = p4.y ;
+    d.p4_0.z = p4.z ;
+    d.p4_0.t = E ;
+    daughters[0] = d ;
     return daughters ;
   }
   
@@ -412,12 +407,23 @@ function multibody_decay(pdgId, p4, daughters, depth){
   
   // Choose a random momentum for the first daughter
   var mbar = 0 ;
-  if(!d.p4_0) alert(pdgId + ' ' + d.pdgId) ;
   for(var i=0 ; i<daughters.length ; i++){
-    if(!daughters[i].p4_0) alert(pdgId + ' ' + daughters[i].pdgId + ' = ' + daughters[i].pdgId) ;
     mbar += daughters[i].p4_0.m() ;
   }
-  var mi = d.p4_0.m() ;
+  
+  // Choose a random mass based on the truncated Cauchy distribution to conserve p4
+  // Leave enough energy for the daughters and siblings
+  var m_min = 0 ;
+  for(var i=0 ; i<d.daughters.length ; i++){
+    m_min += d.daughters[i].m ;
+  }
+  var m_max = (m-mbar) ;
+  var mi = d.m ;
+  if(d.w>1) mi = random_simple_truncated_cauchy(d.m, d.w, m_min, m_max) ;
+  d.m = mi ;
+  d.p4_0.t = sqrt(d.p4_0.p2()+mi*mi) ;
+  
+  //var mi = d.p4_0.m() ;
   var pmax = momentum_two_body_decay(m, mi, mbar) ;
   var p = (daughters.length==1) ? pmax : 0.9*random()*pmax ;
   
@@ -428,7 +434,7 @@ function multibody_decay(pdgId, p4, daughters, depth){
   d.p4_0.y = p3[1] ;
   d.p4_0.z = p3[2] ;
   d.p4_0.t = Ei ;
-  var mu = sqrt(pow(p4.m()-Ei,2)-p*p) ;
+  var mu = sqrt(abs(pow(p4.m()-Ei,2)-p*p)) ;
   var Ebar = sqrt(mu*mu+p*p) ;
   
   var p4_out = new fourVector() ;
@@ -442,6 +448,7 @@ function multibody_decay(pdgId, p4, daughters, depth){
   
   for(var i=0 ; i<daughters.length ; i++){
     daughters[i].p4_0 = daughters[i].p4_0.boost(bv) ;
+    multibody_decay(daughters[i].pdgId, daughters[i].p4_0, daughters[i].daughters, depth+1) ;
   }
   return daughters ;
 }

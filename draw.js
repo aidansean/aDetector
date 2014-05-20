@@ -165,13 +165,14 @@ function draw_detector(paths){
     
     if(names[i]=='cutaway'){
       var y = 36 ;
-      context.fillStyle = 'rgb('+electron_color+')' ; context.fillText('Electron', 4, y ) ; y+= 12 ;
-      context.fillStyle = 'rgb('+muon_color    +')' ; context.fillText('Muon'    , 4, y ) ; y+= 12 ;
-      context.fillStyle = 'rgb('+tau_color     +')' ; context.fillText('Tau'     , 4, y ) ; y+= 12 ;
-      context.fillStyle = 'rgb('+pion_color    +')' ; context.fillText('Pion'    , 4, y ) ; y+= 12 ;
-      context.fillStyle = 'rgb('+kaon_color    +')' ; context.fillText('Kaon'    , 4, y ) ; y+= 12 ;
-      context.fillStyle = 'rgb('+proton_color  +')' ; context.fillText('Proton'  , 4, y ) ; y+= 12 ;
-      context.fillStyle = 'rgb('+photon_color  +')' ; context.fillText('Photon'  , 4, y ) ; y+= 12 ;
+      var dy = 12 ;
+      context.fillStyle = 'rgb('+electron_color+')' ; context.fillText('Electron', 4, y ) ; y+= dy ;
+      context.fillStyle = 'rgb('+muon_color    +')' ; context.fillText('Muon'    , 4, y ) ; y+= dy ;
+      context.fillStyle = 'rgb('+tau_color     +')' ; context.fillText('Tau'     , 4, y ) ; y+= dy ;
+      context.fillStyle = 'rgb('+pion_color    +')' ; context.fillText('Pion'    , 4, y ) ; y+= dy ;
+      context.fillStyle = 'rgb('+kaon_color    +')' ; context.fillText('Kaon'    , 4, y ) ; y+= dy ;
+      context.fillStyle = 'rgb('+proton_color  +')' ; context.fillText('Proton'  , 4, y ) ; y+= dy ;
+      context.fillStyle = 'rgb('+photon_color  +')' ; context.fillText('Photon'  , 4, y ) ; y+= dy ;
     }
   }
 }

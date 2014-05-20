@@ -32,12 +32,24 @@
 <div id="container">
   <div id="heading">
     <h1>aDetector</h1>
-    <p id="tagline">"Now 27% darker and edgier"</p>
+    <p id="tagline">"A simulator simulator"</p>
   </div>
 
   <div id="navcontainer">
   </div>
   <div id="content">
+  
+  <table id="table_tab_selector">
+    <tbody>
+      <tr>
+        <td id="td_tab_selection_detector"   class="tab_selection">Detector view</td>
+        <td id="td_tab_selection_reco"       class="tab_selection">Reconstruction</td>
+        <td id="td_tab_selection_histograms" class="tab_selection">Histograms</td>
+        <td id="td_tab_selection_workspace"  class="tab_selection">Workspace</td>
+      </tr>
+    <tbody>
+  </table>
+  
   
   <div class="tab">
     <div class="tab_row">
@@ -55,12 +67,22 @@
           &theta;: <input type="text" id="input_t"/> &phi;: <input type="text" id="input_p"/><input type="submit" id="submit_coords" value="Change view"/>
         </p>
         <p>
+          Update event display every <input id="input_update_event_display_interval" type="text" value=""/> events <input id="submit_update_event_display_interval" type="submit" value="Change"/><br />
+          Update particle table every <input id="input_update_particle_table_interval" type="text" value=""/> events <input id="submit_update_particle_table_interval" type="submit" value="Change"/><br />
+          Save events:
+          <select id="select_save_events">
+            <option name="true">true</option>
+            <option name="false">false</option>
+          </select>
+          <input id="submit_update_save_events" type="submit" value="Change"/><br />
+        </p>
+        <p>
           <input id="submit_pause"    type="submit" value="Start!"/> <input id="submit_stepOne" type="submit" value="Add 1 event"/>
           <input id="submit_previous" type="submit" value="Previous event"/> <input id="submit_next" type="submit" value="Next event"/>
         </p>
       </div>
       <div class="tab_cell">
-      <p class="center">
+        <p class="center">
           <span id="span_nEvents">0</span> events <br />
           <span id="span_stopwatch">0</span> \(ms\) <br />
           Current event number: <span id="span_event_index">-</span>
@@ -72,8 +94,67 @@
   <div id="histogram_wrapper" class="center">
   </div>
   
+  <table id="table_histogram_first" class="reco_particle">
+    <tbody>
+      <tr><th class="histogram_heading" colspan="3">Create histogram</th></tr>
+      <tr>
+        <th>Name:</th>
+        <td><input id="input_histogram_name" type="text" value=""/></td>
+        <td>(Unique, only letters and numbers)</td>
+      </tr>
+      <tr>
+        <th>x-axis tite:</th>
+        <td><input id="input_histogram_xaxis" type="text" value=""/></td>
+        <td>(Optional, LaTeX supported)</td>
+      </tr>
+      <tr>
+        <th>Unit:</th>
+        <td><input id="input_histogram_unit" type="text" value=""/></td>
+        <td>(Optional)</td>
+      </tr>
+      <tr>
+        <th>Lower bound:</th>
+        <td><input id="input_histogram_lower" type="text" value=""/></td>
+        <td>(Required)</td>
+      </tr>
+      <tr>
+        <th>Upper bound:</th>
+        <td><input id="input_histogram_upper" type="text" value=""/></td>
+        <td>(Required)</td>
+      </tr>
+      <tr>
+        <th>Number of bins:</th>
+        <td><input id="input_histogram_nBins" type="text" value=""/></td>
+        <td>(Required)</td>
+      </tr>
+      <tr>
+        <th>Colour:</th>
+        <td><input id="input_histogram_colour" type="text" value=""/></td>
+        <td>(Optional, default is black)</td>
+      </tr>
+      <tr>
+        <td class="center" colspan="3"><input id="submit_histogram_create" type="submit" value="Create histogram!"/></td>
+      </tr>
+    </tbody>
+  </table>
+  
+  <table id="table_histogram_roster">
+    <thead>
+      <tr>
+        <th class="histogram_roster">Name</th>
+        <th class="histogram_roster">\(x\) axis title</th>
+        <th class="histogram_roster">Unit</th>
+        <th class="histogram_roster">\(x_{low}\)</th>
+        <th class="histogram_roster">\(x_{high}\)</th>
+        <th class="histogram_roster">Bins</th>
+        <th class="histogram_roster">Colour</th>
+      </tr>
+    </thead>
+    <tbody id="tbody_histogram_roster"></tbody>
+  </table>
+  
   <div class="tab">
-    <tdiv class="tab_row">
+    <div class="tab_row">
       <div class="tab_cell">
         <div id="div_user_reco_wrapper">
           <h3>Reconstruction</h3>

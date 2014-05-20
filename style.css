@@ -22,7 +22,7 @@ div#outer_container{
   background-color : white ;
 }
 
-input#input_x, input#input_y, input#input_z, input#input_t, input#input_p{
+input#input_x, input#input_y, input#input_z, input#input_t, input#input_p, input#input_update_event_display_interval, input#input_update_particle_table_interval{
   width : 40px ;
 }
 
@@ -89,7 +89,12 @@ th.reco_particle_heading{
   text-align : center ;
 }
 
-table#reco_particle_first{
+th.histogram_heading{
+  background : #ccffcc ;
+  text-align : center ;
+}
+
+table#reco_particle_first, table#table_histogram_first{
   border-top : 1px solid black ;
   margin-top : 5px ;
 }
@@ -110,5 +115,34 @@ hr.clearboth{
 
 pre#pre_info{
   clear : both ;
+}
+
+
+th.histogram_roster{
+  background : #ccffcc ;
+}
+th.histogram_roster, td.histogram_roster{
+  width : 100px ;
+  font : 10pt arial , sans-serif ;
+  text-align : center ;
+  border : 1px solid black ;
+}
+
+
+
+
+table#table_tab_selector{
+  width : 100% ;
+  border : 1px solid black ;
+}
+
+td.tab_selection{
+  width : 25% ;
+  height : 50px ;
+  background : grey ;
+  color : white ;
+  text-align : center ;
+  vertical-align : middle ;
+  font : 16pt arial , sans-serif ;
 }
 

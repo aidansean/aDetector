@@ -81,9 +81,9 @@ function jet_object(q1, q2, r0, pt, eta, phi, m_max){
   var qb = (max(abs(q1)>abs(q2))) ? q2 : q1 ;
   q1 = qa ;
   q2 = qb ;
+  var parity = (q1>0) ? 1 : -1 ;
   
   var m0 = quark_pair_mass(q1, q2) ;
-  var m = m_max*1.5 ;
   var m = m0 + (m_max-m0)*random() ;
   var par = new particle_object(m, 0, r0, true) ;
   par.color = '0,0,0' ;
@@ -105,23 +105,24 @@ function jet_object(q1, q2, r0, pt, eta, phi, m_max){
     c++ ;
     var qq = choose_qq_pair(remaining_mass) ;
     if(qq==0) break ;
-    quarks.push(-qq) ;
-    quarks.push( qq) ;
+    quarks.push(-1*parity*qq) ;
+    quarks.push(   parity*qq) ;
     var dm = m_qq[qq] ;
     remaining_mass -= dm ;
-    if(remaining_mass<5000){
-      if(random()>remaining_mass/5000) break ;
+    if(remaining_mass<2000){
+      if(random()>remaining_mass/2000) break ;
     }
   }
-  quarks.push(-par.q2) ;
+  quarks.push(par.q2) ;
   for(var i=0 ; i<quarks.length ; i+=2){
-    var q1 = abs(quarks[i+0]) ;
-    var q2 = abs(quarks[i+1]) ;
-    var qa = max(q1,q2) ;
-    var qb = min(q1,q2) ;
+    var q1 = quarks[i+0] ;
+    var q2 = quarks[i+1] ;
+    var qa = (abs(q1)>abs(q2)) ? q1 : q2 ;
+    var qb = (abs(q1)>abs(q2)) ? q2 : q1 ;
     var spin = (random()<0.2) ? 1 : 0 ;
-    var pdgId = 100*qa + 10*qb + 2*spin + 1 ;
-    pdgId *= (qa==q1 && qb==q2) ? 1 : -1 ;
+    var pdgId = 100*abs(qa) + 10*abs(qb) + 2*spin + 1 ;
+    if(qa<0) pdgId *= -1 ;
+    if(abs(qa)==2 && abs(qb)==1) pdgId *= -1 ; // Make exception for pi+, rho+ etc
     hadrons.push(pdgId) ;
   }
   if(quarks.length<2 || hadrons.length==0){
@@ -137,7 +138,7 @@ function jet_object(q1, q2, r0, pt, eta, phi, m_max){
     par.daughters.push(dau) ;
     m_total += dau.p4_0.m() ;
   }
-  if(m_total>0.9*par.m){
+  if(m_total>par.m){
     par.is_valid = false ;
     return par ;
   }
@@ -146,7 +147,6 @@ function jet_object(q1, q2, r0, pt, eta, phi, m_max){
   for(var i=0 ; i<par.daughters.length ; i++){
     pdgIds_tmp.push(par.daughters[i].pdgId) ;
   }
-  //alert('Hadrons = ' + hadrons + ' ; ' + pdgIds_tmp) ;
   par.is_valid = true ;
   var px = pt*cos(phi) ;
   var py = pt*sin(phi) ;

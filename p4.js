@@ -198,7 +198,7 @@ function random_boost(b){
 }
 
 function cauchy(x, m, w){
-  return w/(pi*(pow(x-m,2)+w*w)) ;
+  return w*w/((x-m)*(x-m)+w*w) ;
 }
 function inverse_cauchy(y, m, w){
   var d = w/(pi*y) - w*w ;
@@ -214,3 +214,14 @@ function random_phi_theta(){
   return [phi,theta] ;
 }
 
+function random_simple_truncated_cauchy(m, w, x_min, x_max){
+  if(w<1e-3) return m ;
+  var y_x_min = atan((x_min-m)/w) ;
+  var y_x_max = atan((x_max-m)/w) ;
+  var y_min = min(y_x_min,y_x_max) ;
+  var y_max = max(y_x_min,y_x_max) ;
+  var y = y_min + random()*(y_max-y_min) ;
+  var x = m + w*tan(y) ;
+  return x ;
+}
+function integral_Cauchy(x, m, w){ return atan((x-m)/w) ; }

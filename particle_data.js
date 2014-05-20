@@ -749,10 +749,11 @@ function virtual_photon_object(r0, m){
     //[0.01      , [ 11,  -11, 22]] ,
     //[0.01      , [ 13,  -13, 22]] ,
     //[1.30      , [  4,   -4]] ,
-    [0.35      , [  3,   -3]] 
-    //[1.39      , [  2,   -2]] ,
-    //[0.35      , [  1,   -1]] 
+    [0.35      , [  3,   -3]] ,
+    [1.39      , [  2,   -2]] ,
+    [0.35      , [  1,   -1]] 
     //[0.1       , [443,   22]] // Arbitrary value for lulz
+    //[0.1       , [313, -313]] // Arbitrary value for lulz
   ] ;
   par.normalise_decays() ;
   return par ;

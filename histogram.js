@@ -1,4 +1,5 @@
-function histogram_object(xaxis_title, lower, upper, nBins, units, fill_color){
+function histogram_object(name, xaxis_title, lower, upper, nBins, units, fill_color){
+  this.name  = name ;
   this.lower = lower ;
   this.upper = upper ;
   this.nBins = nBins ;
@@ -150,6 +151,23 @@ function histogram_object(xaxis_title, lower, upper, nBins, units, fill_color){
     for(var i=0 ; i<this.nBins ; i++){ this.active_bins[i] = false ; }
   }
   this.r_from_x = function(x){ return (x-this.lower)/(this.upper-this.lower) ; }
+  this.update_histogram_roster = function(){
+    var id = 'tr_histogram_roster_' + this.name ;
+    if(Get(id)) return ;
+    var tbody = Get('tbody_histogram_roster') ;
+    var tr = Create('tr') ;
+    tr.id = id ;
+    var td ;
+    td = Create('td') ; td.className = 'histogram_roster' ; td.innerHTML = this.name ; tr.appendChild(td) ;
+    td = Create('td') ; td.className = 'histogram_roster' ; td.innerHTML = this.xaxis_title ; tr.appendChild(td) ;
+    td = Create('td') ; td.className = 'histogram_roster' ; td.innerHTML = this.units ; tr.appendChild(td) ;
+    td = Create('td') ; td.className = 'histogram_roster' ; td.innerHTML = this.lower ; tr.appendChild(td) ;
+    td = Create('td') ; td.className = 'histogram_roster' ; td.innerHTML = this.upper ; tr.appendChild(td) ;
+    td = Create('td') ; td.className = 'histogram_roster' ; td.innerHTML = this.nBins ; tr.appendChild(td) ;
+    td = Create('td') ; td.className = 'histogram_roster' ; td.innerHTML = this.fill_color ; tr.appendChild(td) ;
+    tbody.appendChild(tr) ;
+  }
+  this.update_histogram_roster() ;
 }
 
 function axis_object(lower, upper, nBins, title, units, coord){
