@@ -2,8 +2,8 @@
 <html xmlns='http://www.w3.org/1999/xhtml' xml:lang='en' lang='en'>
 <head>
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
-<script type="text/javascript" src="http://www.aidansean.com/MathJax/MathJax.js"></script>
-<link type="text/css" rel="stylesheet" media="all" href="http://www.aidansean.com/css/style.css" />
+<script type="text/javascript" src="/MathJax/MathJax.js"></script>
+<link type="text/css" rel="stylesheet" media="all" href="/css/style.php" />
 <link type="text/css" rel="stylesheet" media="all" href="style.css" />
 <script type="text/javascript" src="helper.js"></script>
 <script type="text/javascript" src="p4.js"></script>
@@ -42,15 +42,16 @@
   <table id="table_tab_selector">
     <tbody>
       <tr>
-        <td id="td_tab_selection_detector"   class="tab_selection">Detector view</td>
-        <td id="td_tab_selection_reco"       class="tab_selection">Reconstruction</td>
-        <td id="td_tab_selection_histograms" class="tab_selection">Histograms</td>
-        <td id="td_tab_selection_workspace"  class="tab_selection">Workspace</td>
+        <td id="td_tab_selection_detector"  class="tab_selection tab_selection_depressed">Detector view</td>
+        <td id="td_tab_selection_reco"      class="tab_selection tab_selection_depressed">Reconstruction</td>
+        <td id="td_tab_selection_histogram" class="tab_selection tab_selection_depressed">Histograms</td>
+        <td id="td_tab_selection_workspace" class="tab_selection tab_selection_depressed">Workspace</td>
+        <td id="td_tab_selection_particle"  class="tab_selection tab_selection_depressed">Particles</td>
       </tr>
     <tbody>
   </table>
   
-  
+  <div id="div_detector_container">
   <div class="tab">
     <div class="tab_row">
       <div class="tab_cell">
@@ -61,6 +62,10 @@
         <canvas id="canvas_detector_longitudinal" width="250" height="200"></canvas><br />  
       </div>
     </div>
+  </div>
+  </div>
+  
+  <div class="tab">
     <div class="tab_row">
       <div class="tab_cell">
         <p class="center">x: <input type="text" id="input_x"/> y: <input type="text" id="input_y"/> z: <input type="text" id="input_z"/>
@@ -71,8 +76,8 @@
           Update particle table every <input id="input_update_particle_table_interval" type="text" value=""/> events <input id="submit_update_particle_table_interval" type="submit" value="Change"/><br />
           Save events:
           <select id="select_save_events">
-            <option name="true">true</option>
-            <option name="false">false</option>
+            <option value="true">true</option>
+            <option value="false">false</option>
           </select>
           <input id="submit_update_save_events" type="submit" value="Change"/><br />
         </p>
@@ -90,11 +95,13 @@
       </div>
     </div>
   </div>
-  
-  <div id="histogram_wrapper" class="center">
   </div>
   
-  <table id="table_histogram_first" class="reco_particle">
+  <div id="div_histogram_container">
+    <div id="histogram_wrapper" class="center">
+    </div>
+  
+    <table id="table_histogram_first" class="reco_particle">
     <tbody>
       <tr><th class="histogram_heading" colspan="3">Create histogram</th></tr>
       <tr>
@@ -137,8 +144,8 @@
       </tr>
     </tbody>
   </table>
-  
-  <table id="table_histogram_roster">
+    
+    <table id="table_histogram_roster">
     <thead>
       <tr>
         <th class="histogram_roster">Name</th>
@@ -152,7 +159,9 @@
     </thead>
     <tbody id="tbody_histogram_roster"></tbody>
   </table>
+  </div>
   
+  <div id="div_reco_container">
   <div class="tab">
     <div class="tab_row">
       <div class="tab_cell">
@@ -203,67 +212,7 @@
             </tbody>
           </table>
           <table class="reco_particle">
-            <tbody>
-              <tr><th class="reco_particle_heading" colspan="6">Filters</th></tr>
-            </tbody>
-            <tbody id="tbody_reco_particle_filter_mass">
-              <tr>
-                <th>Mass:</th>
-                <td><input id="input_reco_mass_lower" class="input_filter" value="-1e30"/></td>
-                <td>\(&lt;m&lt;\)</td>
-                <td><input id="input_reco_mass_upper" class="input_filter" value="1e30"/></td>
-                <td>\(\mathrm{MeV}\)</td>
-                <td><input id="checkbox_reco_mass_filter" type="checkbox" selected="not_selected"/></td>
-              </tr>
-              <tr>
-                <th>Momentum:</th>
-                <td><input id="input_reco_p_lower" class="input_filter" value="-1e30"/>
-                <td>\(&lt;p&lt;\)</td>
-                <td><input id="input_reco_p_upper" class="input_filter" value="1e30"/></td>
-                <td>\(\mathrm{MeV}\)</td>
-                <td><input id="checkbox_reco_p_filter" type="checkbox" selected="not_selected"/></td>
-              </tr>
-              <tr>
-                <th>Transverse momentum:</th>
-                <td><input id="input_reco_pT_lower" class="input_filter" value="-1e30"/></td>
-                <td>\(&lt;p_T&lt;\)</td>
-                <td><input id="input_reco_pT_upper" class="input_filter" value="1e30"/></td>
-                <td>\(\mathrm{MeV}\)</td>
-                <td><input id="checkbox_reco_pT_filter" type="checkbox" selected="not_selected"/></td>
-              </tr>
-              <tr>
-                <th>Energy:</th>
-                <td><input id="input_reco_E_lower" class="input_filter" value="-1e30"/></td>
-                <td>\(&lt;E&lt;\)</td>
-                <td><input id="input_reco_E_upper" class="input_filter" value="1e30"/></td>
-                <td>\(\mathrm{MeV}\)</td>
-                <td><input id="checkbox_reco_E_filter" type="checkbox" selected="not_selected"/></td>
-              </tr>
-              <tr>
-                <th>Pseudorapidity:</th>
-                <td><input id="input_reco_eta_lower" class="input_filter" value="-1e30"/></td>
-                <td>\(&lt;|\eta|&lt;\)</td>
-                <td><input id="input_reco_eta_upper" class="input_filter" value="1e30"/></td>
-                <td></td>
-                <td><input id="checkbox_reco_eta_filter" type="checkbox" selected="not_selected"/></td>
-              </tr>
-              <tr>
-                <th>Helicity:</th>
-                <td><input id="input_reco_hel_lower" class="input_filter" value="-1e30"/></td>
-                <td>\(&lt;\cos\Theta_H&lt;\)</td>
-                <td><input id="input_reco_hel_upper" class="input_filter" value="1e30"/></td>
-                <td></td>
-                <td><input id="checkbox_reco_hel_filter" type="checkbox" selected="not_selected"/></td>
-              </tr>
-              <tr>
-                <th>Transverse impact:</th>
-                <td><input id="input_reco_d0_lower" class="input_filter" value="-1e30"/></td>
-                <td>\(&lt;|d_0|&lt;\)</td>
-                <td><input id="input_reco_d0_upper" class="input_filter" value="1e30"/></td>
-                <td>\(\mathrm{m}\)</td>
-                <td><input id="checkbox_reco_d0_filter" type="checkbox" selected="not_selected"/></td>
-              </tr>
-            </tbody>
+            <tbody><tr><th class="reco_particle_heading" colspan="6">Filters</th></tr></tbody>
             <tbody id="tbody_reco_particle_filters"></tbody>
           </table>
           <table class="reco_particle">
@@ -281,10 +230,57 @@
       </div>
     </div>
   </div>
+  </div>
   
+  <div id="div_workspace_container">
+  <h3>Workspace</h3>
+  <div id="plot_space_wrapper" class="center">
+    <input type="submit" id="submit_new_plot_space" value="Add new plot space"/>
+  </div>
+  <table>
+    <thead>
+      <tr>
+        <th>Fill histogram</th>
+        <th>with quantity</th>
+        <th>from collection</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+          <select id="select_fill_histogram_histogram">
+          </select>
+        </td>
+        <td>
+          <select id="select_fill_histogram_quantity">
+            <option value="m">mass</option>
+            <option value="E">energy</option>
+            <option value="p">momentum</option>
+            <option value="pT">transverse momentum</option>
+            <option value="eta">pseudorapidity</option>
+            <option value="hel">helicity</option>
+            <option value="d0">transverse impact</option>
+          </select>
+        </td>
+        <td>
+          <select id="select_fill_histogram_collection">
+          </select>
+        </td>
+        <td>
+          <input type="submit" id="submit_fill_histogram" value="Go!"/>
+        </td>
+      </tr>
+    </tbody>
+    <tbody id="tbody_fill_histogram">
+    </tbody>
+  </table>
+  </div>
   
   <pre id="pre_info"></pre>
   <hr class="clearboth"/>
+  
+  <div id="div_particle_container">
   <table id="table_particle_info">
     <thead>
       <tr>
@@ -311,12 +307,14 @@
     </thead>
     <tbody id="tbody_particle_info"></tbody>
   </table>
+  </div>
   
   </div>
   
   <div id="footer">&copy; 2010-2014 Aidan Randle-Conde
   <br />
-  Validation: <a href="http://validator.w3.org/check?uri=referer">XHTML</a> / <a href="http://jigsaw.w3.org/css-validator/check/referer?profile=css3">CSS</a>
+  Validation: <a href="http://validator.w3.org/check?uri=referer">XHTML</a> / <a href="http://jigsaw.w3.org/css-validator/check/referer?profile=css3">CSS</a><br />
+  Icons taken from https://www.iconfinder.com/search/?q=iconset%3Adefaulticon
   </div>
   
 </div>

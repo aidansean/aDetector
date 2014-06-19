@@ -128,7 +128,57 @@ th.histogram_roster, td.histogram_roster{
   border : 1px solid black ;
 }
 
+div.plot{
+  background : #ffffff ;
+  margin : 2px ;
+  text-align : center ;
+  padding-top : 5px ;
+}
 
+table.plot{
+  margin-bottom : 20px ;
+  width : 252px ;
+  border-collapse : collapse ;
+  border : 1px solid black ;
+  border-top : 0px solid black ;
+  margin-top : 0px ;
+  display : block ;
+  margin : auto ;
+  border-spacing : 0px ;
+}
+
+td.ps_histogram_show   { width :  10px ; }
+td.ps_histogram_name   { width : 100px ; }
+td.ps_histogram_options{ width :  30px ; }
+td.ps_histogram_remove { width : 100px ; }
+td.ps_histogram_remove{
+  text-align : left ;
+}
+
+td.ps_histogram_show, td.ps_histogram_name, td.ps_histogram_options, td.ps_histogram_remove{
+  padding : 0px ;
+}
+
+img.icon_histogram{
+  width  : 16px ;
+  height : 16px ;
+  border : 0px ;
+  margin : 0px ;
+}
+
+select.plot_histogram{
+  width : 100px ;
+}
+
+input.draw_options{
+  width : 20px ;
+}
+input.plot_submit_histogram{
+  width : 60px ;
+}
+input.plot_histogram_up, input.plot_histogram_down{
+  width : 15px ;
+}
 
 
 table#table_tab_selector{
@@ -137,12 +187,24 @@ table#table_tab_selector{
 }
 
 td.tab_selection{
-  width : 25% ;
-  height : 50px ;
+  width : 20% ;
+  height : 40px ;
   background : grey ;
   color : white ;
   text-align : center ;
   vertical-align : middle ;
-  font : 16pt arial , sans-serif ;
+  font : 12pt arial black , sans-serif ;
+}
+td.tab_selection_depressed{
+  background : black ;
+  color : white ;
 }
 
+canvas.plot{
+  margin : 0px ;
+  display : block ;
+  margin : auto ;
+}
+
+div#outer_container{
+}

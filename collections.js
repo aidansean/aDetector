@@ -16,13 +16,15 @@ function collection_object(name, title, pdgId, both_charges, is_raw_list, daught
   this.both_charges = both_charges ;
   this.is_raw_list = is_raw_list ;
   
-  this.filter_mass = false ; this.mass_lower = -1e30 ; this.mass_upper = 1e30 ;
-  this.filter_E    = false ; this.E_lower    = -1e30 ; this.E_upper    = 1e30 ;
-  this.filter_p    = false ; this.p_lower    = -1e30 ; this.p_upper    = 1e30 ;
-  this.filter_pT   = false ; this.pT_lower   = -1e30 ; this.pT_upper   = 1e30 ;
-  this.filter_eta  = false ; this.eta_lower  = -1e30 ; this.eta_upper  = 1e30 ;
-  this.filter_hel  = false ; this.hel_lower  = -1e30 ; this.hel_upper  = 1e30 ;
-  this.filter_d0   = false ; this.d0_lower   = -1e30 ; this.d0_upper   = 1e30 ;
+  this.lowers = [] ;
+  this.uppers = [] ;
+  this.filter = [] ;
+  for(var i=0 ; i<variable_names.length ; i++){
+    var vname = variable_names[i] ;
+    this.lowers[vname] = -1e30 ;
+    this.uppers[vname] =  1e30 ;
+    this.filter[vname] = false ;
+  }
   
   this.list           = [] ;
   this.daughter_names = daughter_names ;
@@ -58,22 +60,21 @@ function collection_object(name, title, pdgId, both_charges, is_raw_list, daught
     else{
       this.list = combine_lists_of_particles(this.pdgId, this.daughter_lists) ;
     }
-    if(this.filter_mass) this.list = filter_list_of_particles_by_mass(this.list, this.mass_lower, this.mass_upper) ;
-    if(this.filter_E   ) this.list = filter_list_of_particles_by_E   (this.list, this.E_lower   , this.E_upper   ) ;
-    if(this.filter_p   ) this.list = filter_list_of_particles_by_p   (this.list, this.p_lower   , this.p_upper   ) ;
-    if(this.filter_pT  ) this.list = filter_list_of_particles_by_pT  (this.list, this.pT_lower  , this.pT_upper  ) ;
-    if(this.filter_eta ) this.list = filter_list_of_particles_by_eta (this.list, this.eta_lower , this.eta_upper ) ;
-    if(this.filter_hel ) this.list = filter_list_of_particles_by_hel (this.list, this.hel_lower , this.hel_upper ) ;
-    if(this.filter_d0  ) this.list = filter_list_of_particles_by_d0  (this.list, this.d0_lower  , this.d0_upper  ) ;
+    for(var i=0 ; i<variable_names.length ; i++){
+      var vname = variable_names[i] ;
+      if(this.filter[vname]) this.list = variables_list[vname].filter_list_of_particles(this.list, this.lowers[vname], this.uppers[vname]) ;
+    }
   }
   this.populate_list_from_event = function(event){
     this.list = filter_list_of_particles_by_pdgId(event.particles, this.pdgId, this.both_charges) ;
   }
-  this.m = function(){
+  
+  this.get_variable_array = function(vname){
     var results = [] ;
-    for(var i=0 ; i<this.list.length ; i++){ results.push(this.list[i].p4_r.m()) ; }
+    for(var i=0 ; i<this.list.length ; i++){ results.push(variables_list[vname].get_value(this.list[i])) ; }
     return results ;
   }
+  update_select_fill_histogram_collection(this.name, this.title) ;
 }
 
 function make_new_reco_particle(){
@@ -111,63 +112,18 @@ function make_new_reco_particle(){
   
   // Now get filter information
   // This can probably be simplified a lot
-  for(var i=0 ; i<filter_names.length ; i++){
-    // Etc.  Define a filter class to handle these
+  coll.lowers = [] ;
+  coll.uppers = [] ;
+  coll.filter = [] ;
+  for(var i=0 ; i<variable_names.length ; i++){
+    var vname = variable_names[i] ;
+    coll.lowers[vname] = parseFloat(Get('input_reco_' + vname + '_lower').value) ;
+    coll.uppers[vname] = parseFloat(Get('input_reco_' + vname + '_upper').value) ;
+    coll.filter[vname] = (Get('checkbox_reco_' + vname + '_filter').checked) ;
+    if(isNaN(coll.lowers[vname])){ alert('Please enter a valid lower ' + vname + '.') ; return false ; }
+    if(isNaN(coll.uppers[vname])){ alert('Please enter a valid upper ' + vname + '.') ; return false ; }
   }
-  var mass_lower  = parseFloat(Get('input_reco_mass_lower').value) ;
-  var mass_upper  = parseFloat(Get('input_reco_mass_upper').value) ;
-  var filter_mass = (Get('checkbox_reco_mass_filter').checked) ;
-  
-  var p_lower     = parseFloat(Get('input_reco_p_lower').value) ;
-  var p_upper     = parseFloat(Get('input_reco_p_upper').value) ;
-  var filter_p    = (Get('checkbox_reco_p_filter').checked) ;
-  
-  var pT_lower    = parseFloat(Get('input_reco_pT_lower').value) ;
-  var pT_upper    = parseFloat(Get('input_reco_pT_upper').value) ;
-  var filter_pT   = (Get('checkbox_reco_pT_filter').checked) ;
-  
-  var E_lower     = parseFloat(Get('input_reco_E_lower').value) ;
-  var E_upper     = parseFloat(Get('input_reco_E_upper').value) ;
-  var filter_E    = (Get('checkbox_reco_E_filter').checked) ;
-  
-  var eta_lower   = parseFloat(Get('input_reco_eta_lower').value) ;
-  var eta_upper   = parseFloat(Get('input_reco_eta_upper').value) ;
-  var filter_eta  = (Get('checkbox_reco_eta_filter').checked) ;
-  
-  var hel_lower   = parseFloat(Get('input_reco_hel_lower').value) ;
-  var hel_upper   = parseFloat(Get('input_reco_hel_upper').value) ;
-  var filter_hel  = (Get('checkbox_reco_hel_filter').checked) ;
-  
-  var d0_lower    = parseFloat(Get('input_reco_d0_lower').value) ;
-  var d0_upper    = parseFloat(Get('input_reco_d0_upper').value) ;
-  var filter_d0   = (Get('checkbox_reco_d0_filter').checked) ;
-  
-  // Validate filter values
-  if(isNaN(mass_lower)){ alert('Please enter a valid lower mass.'                       ) ; return false ; }
-  if(isNaN(mass_upper)){ alert('Please enter a valid upper mass.'                       ) ; return false ; }
-  if(isNaN(p_lower   )){ alert('Please enter a valid lower momentum.'                   ) ; return false ; }
-  if(isNaN(p_upper   )){ alert('Please enter a valid upper momentum.'                   ) ; return false ; }
-  if(isNaN(pT_lower  )){ alert('Please enter a valid lower transverse momentum.'        ) ; return false ; }
-  if(isNaN(pT_upper  )){ alert('Please enter a valid upper transverse momentum.'        ) ; return false ; }
-  if(isNaN(E_lower   )){ alert('Please enter a valid lower energy.'                     ) ; return false ; }
-  if(isNaN(E_upper   )){ alert('Please enter a valid upper energy.'                     ) ; return false ; }
-  if(isNaN(eta_lower )){ alert('Please enter a valid lower pseudorapidity.'             ) ; return false ; }
-  if(isNaN(eta_upper )){ alert('Please enter a valid upper pseudorapidity.'             ) ; return false ; }
-  if(isNaN(hel_lower )){ alert('Please enter a valid lower helicity.'                   ) ; return false ; }
-  if(isNaN(hel_upper )){ alert('Please enter a valid upper helicity.'                   ) ; return false ; }
-  if(isNaN(d0_lower  )){ alert('Please enter a valid lower transverse impact parameter.') ; return false ; }
-  if(isNaN(d0_upper  )){ alert('Please enter a valid upper transverse impact parameter.') ; return false ; }
-  
   collection_names.push(name) ;
-  
-  coll.filter_mass = filter_mass ; coll.mass_lower = mass_lower ; coll.mass_upper = mass_upper ;
-  coll.filter_p    = filter_p    ; coll.p_lower    = p_lower    ; coll.p_upper    = p_upper    ;
-  coll.filter_pT   = filter_pT   ; coll.pT_lower   = pT_lower   ; coll.pT_upper   = pT_upper   ;
-  coll.filter_E    = filter_E    ; coll.E_lower    = E_lower    ; coll.E_upper    = E_upper    ;
-  coll.filter_eta  = filter_eta  ; coll.eta_lower  = eta_lower  ; coll.eta_upper  = eta_upper  ;
-  coll.filter_hel  = filter_hel  ; coll.hel_lower  = hel_lower  ; coll.hel_upper  = hel_upper  ;
-  coll.filter_d0   = filter_d0   ; coll.d0_lower   = d0_lower   ; coll.d0_upper   = d0_upper   ;
-  
   if(Get('submit_reco_particle_mergeLists').checked) coll.merge = true ;
   
   collections[name] = coll ;
@@ -176,10 +132,22 @@ function make_new_reco_particle(){
   window.setTimeout(rerun_mathjax,100) ;
   reset_reco_particle_form() ;
   
-  plot_spaces[name] = new plot_space_object(name) ;
-  histograms[name] = new histogram_object('mass (' + title+')',  500,  1500,  50, 'MeV',   '0,0,0') ;
-  histograms[name].draw(plot_spaces[name],'e') ;
-  plot_names.push(name) ;
+  if(false){
+    // Create a histogram and plot space for the mass distribution
+    var m_l = max(mass_lower, 0) ;
+    var m_u = min(mass_upper, mu) ;
+    plot_spaces[name] = new plot_space_object(name) ;
+    histograms[name] = new histogram_object(name, 'mass ('+title+')',  m_l,  m_u,  50, 'MeV',   '0,0,0') ;
+    histograms[name].draw(plot_spaces[name],'e') ;
+    plot_spaces[name].add_histogram(histograms[name], 'e') ;
+    plot_spaces[name].fill_histogram_table() ;
+    plot_names.push(name) ;
+  
+    // Update plot spaces to allow the user to plot this histogram on them
+    for(var i=0 ; i<plot_names.length ; i++){
+      plot_spaces[plot_names[i]].fill_histogram_table() ;
+    }
+  }
 }
 
 // Manipulating the DOM
@@ -216,18 +184,15 @@ function make_particle_collection_select(index){
 }
 function reset_reco_particle_form(){
   Get('tbody_reco_particle_daughters').innerHTML = '' ;
-  Get('tbody_reco_particle_filters'  ).innerHTML = '' ;
   Get('input_reco_name' ).value = '' ;
   Get('input_reco_title').value = '' ;
   Get('input_reco_pdgId').value = '' ;
   
-  var vnames = ['mass','p','pT','E','eta','hel','d0'] ;
-  for(var i=0 ; i<vnames.length ; i++){
-    Get('input_reco_'+vnames[i]+'_lower').value = -1e30 ;
-    Get('input_reco_'+vnames[i]+'_upper').value =  1e30 ;
-    Get('checkbox_reco_'+vnames[i]+'_filter').checked = false ;
+  for(var i=0 ; i<variable_names.length ; i++){
+    Get('input_reco_'    + variable_names[i] + '_lower').value = -1e30 ;
+    Get('input_reco_'    + variable_names[i] + '_upper').value =  1e30 ;
+    Get('checkbox_reco_' + variable_names[i] + '_filter').checked = false ;
   }
-  
   particle_collection_select_index = 1 ;
   add_reco_particle_collection_tr() ;
 }
@@ -328,6 +293,14 @@ function make_particle_table_row(th_content, td_content){
   return tr ;
 }
 
+function update_select_fill_histogram_collection(name, title){ // Awful function name!
+  var select = Get('select_fill_histogram_collection') ;
+  var option = Create('option') ;
+  option.value     = name ;
+  option.innerHTML = title ;
+  select.appendChild(option) ;
+}
+
 // A unique id to keep track of particles being added to lists, to make sure we don't use the same particle twice when making composites.  Not sure if this works properly!
 function make_raw_collections(){
   var charged_particles = [] ;
@@ -342,8 +315,8 @@ function make_raw_collections(){
   for(var i=0 ; i<charged_particles.length ; i++){
     var cp = charged_particles[i] ;
     raw_collection_info.push(['raw_'+cp[0]     , cp[1]+'^\\pm\\)',  cp[2],  true]) ;
-    raw_collection_info.push(['raw_'+cp[0]+'_p', cp[1]+'^+\\)',  cp[2], false]) ;
-    raw_collection_info.push(['raw_'+cp[0]+'_m', cp[1]+'^-\\)', -cp[2], false]) ;
+    raw_collection_info.push(['raw_'+cp[0]+'_p', cp[1]+'^+\\)'   ,  cp[2], false]) ;
+    raw_collection_info.push(['raw_'+cp[0]+'_m', cp[1]+'^-\\)'   , -cp[2], false]) ;
   }
   raw_collection_info.push(['raw_photons', '\\(\\gamma\\)', 22, true]) ;
   
@@ -353,7 +326,6 @@ function make_raw_collections(){
     collections[coll[0]] = new collection_object(coll[0], coll[1], coll[2], coll[3], true, []) ;
   }
 }
-
 
 var uid = 1000 ;
 function combine_lists_of_particles(pdgId, particle_lists){

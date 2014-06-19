@@ -119,7 +119,7 @@ function jet_object(q1, q2, r0, pt, eta, phi, m_max){
     var q2 = quarks[i+1] ;
     var qa = (abs(q1)>abs(q2)) ? q1 : q2 ;
     var qb = (abs(q1)>abs(q2)) ? q2 : q1 ;
-    var spin = (random()<0.2) ? 1 : 0 ;
+    var spin = (random()<0.5) ? 1 : 0 ;
     var pdgId = 100*abs(qa) + 10*abs(qb) + 2*spin + 1 ;
     if(qa<0) pdgId *= -1 ;
     if(abs(qa)==2 && abs(qb)==1) pdgId *= -1 ; // Make exception for pi+, rho+ etc

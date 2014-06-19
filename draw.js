@@ -1,4 +1,6 @@
 function draw_polygons(settings, trajs, canvas, image_name){
+  if(Get('div_detector_container').style.display=='none') return ; // Save some CPU time
+
   // Unpack settings from the settings wrapper
   var r0 = settings.r0 ;
   var t0 = settings.t0 ;

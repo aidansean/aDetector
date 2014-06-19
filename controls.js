@@ -96,6 +96,21 @@ function change_save_events(){
   if(value=='false') record_events = false ;
 }
 
+function select_tab(e){
+  var td_1 = e.target ;
+  var name = td_1.id.split('_') ;
+  var id = 'div_' + name[3] + '_container' ;
+  var td_2 = Get(id) ;
+  if(td_1.className.indexOf('depressed')==-1){
+    td_1.className = 'tab_selection tab_selection_depressed' ;
+    td_2.style.display = '' ;
+  }
+  else{
+    td_1.className = 'tab_selection' ;
+    td_2.style.display = 'none' ;
+  }
+}
+
 function add_eventListeners(){
   document.addEventListener('keydown', keyDown) ;
   Get('submit_coords'  ).addEventListener('click', update_coords  ) ;
@@ -111,6 +126,14 @@ function add_eventListeners(){
   Get('submit_update_event_display_interval' ).addEventListener('click', change_update_event_dsiplay_interval ) ;
   Get('submit_update_particle_table_interval').addEventListener('click', change_update_particle_table_interval) ;
   Get('submit_update_save_events').addEventListener('click', change_save_events) ;
+  
+  Get('td_tab_selection_detector' ).addEventListener('click', select_tab) ;
+  Get('td_tab_selection_reco'     ).addEventListener('click', select_tab) ;
+  Get('td_tab_selection_histogram').addEventListener('click', select_tab) ;
+  Get('td_tab_selection_workspace').addEventListener('click', select_tab) ;
+  Get('td_tab_selection_particle' ).addEventListener('click', select_tab) ;
+  
+  Get('submit_histogram_create').addEventListener('click', create_histogram) ;
+  Get('submit_new_plot_space'  ).addEventListener('click', create_plotSpace) ;
+  Get('submit_fill_histogram'  ).addEventListener('click', submit_fillHisto) ;
 }
-
-

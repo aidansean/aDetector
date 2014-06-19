@@ -5,7 +5,7 @@ var counter =  0 ;
 var stop    = -1 ;
 var delay   =  5 ;
 
-var  draw_interval     = 1 ;
+var  draw_interval     = 1000 ;
 var table_interval     = 1 ;
 var n_trigger_attempts = 10 ;
 
@@ -41,4 +41,4 @@ var event_index = -1 ;
 var record_events = false ;
 
 var particle_collection_select_index = 1 ;
-
+var plot_space_index = 1 ;

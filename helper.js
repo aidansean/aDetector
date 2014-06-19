@@ -20,5 +20,12 @@ function   floor(x){ return Math.floor(x)   ; }
 function   pow(x,n){ return Math.pow(x,n)   ; }
 function atan2(y,x){ return Math.atan2(y,x) ; }
 
-function rerun_mathjax(){ var MathJax = null ; if(MathJax) MathJax.Hub.Queue(['Typeset',MathJax.Hub]) ; }
+function rerun_mathjax(){
+  var MathJax = null ;
+  if(MathJax) MathJax.Hub.Queue(['Typeset',MathJax.Hub]) ;
+}
+function get_selected_option(id){
+  var select = Get(id) ;
+  return select.options[select.selectedIndex].value ;
+}
 
