@@ -155,6 +155,7 @@ function fourVector(){
 function momentum_two_body_decay(M, m1, m2){
   return sqrt((M*M-(m1+m2)*(m1+m2))*(M*M-(m1-m2)*(m1-m2)))/(2*M) ;
 }
+
 function random_threeVector(p){
   var phi_theta = random_phi_theta() ;
   var phi   = phi_theta[0] ;

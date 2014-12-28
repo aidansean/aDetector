@@ -15,9 +15,27 @@ function fill_rule_object(collection_name, variable_name, histogram_name){
   this.variable_name   = variable_name   ;
   this.histogram_name  = histogram_name  ;
   this.fill = function(){
-    //alert(this.collection_name + ' ' + this.variable_name + ' ' + this.histogram_name) ;
-    histograms[this.histogram_name].fill_array(collections[this.collection_name].get_variable_array(this.variable_name)) ;
+      histograms[this.histogram_name].fill_array(collections[this.collection_name].get_variable_array(this.variable_name)) ;
   }
+}
+
+function draw_canvas_new_plot_space(){
+  return ;
+  var canvas = Get('canvas_new_plot_space') ;
+  var context = canvas.getContext('2d') ;
+  var w = canvas.width  ;
+  var h = canvas.height ;
+  var lw = w/8 ;
+  context.fillStyle   = 'rgb(225,225,225)' ;
+  context.strokeStyle = 'rgb(255,255,255)' ;
+  context.fillRect(0,0,w,h) ;
+  context.lineWidth = lw ;
+  context.lineCap = 'round' ;
+  context.moveTo(0.5*w,    lw) ;
+  context.lineTo(0.5*w,  h-lw) ;
+  context.moveTo(   lw, 0.5*h) ;
+  context.lineTo( w-lw, 0.5*h) ;
+  context.stroke() ;
 }
 
 function start(){
@@ -27,20 +45,26 @@ function start(){
   for(var i=0 ; i<variable_names.length ; i++){ variables_list[variable_names[i]].make_filter_row() ; }
   
   // Build detector
-  detector.components.push(new beampipe_object('beampipe', 20, 1.0, '0,0,0')) ;
-  detector.components.push(new  tracker_object('tracker' , 0.05, 0.5,  -3.0, 3.0, 6,  1, 12, 0.4 , 0.05, '150,100,150', '200,   0, 200')) ;
-  detector.components.push(new     ecal_object('ecal'    , 0.7 , 1.7,  -3.0, 3.0, 2, 12,  6, 0.05, 0.05, '100,100,255', '  0,   0, 100')) ;
-  detector.components.push(new     ecal_object('ecal_fwd', 0.05, 1.7,   3.0, 4.0, 2,  3,  6, 0.05, 0.05, '100,100,255', '  0,   0, 100')) ;
-  detector.components.push(new     hcal_object('hcal'    , 2.0 , 3.0,  -4.0, 4.0, 3, 12,  6, 0.09, 0.05, ' 50,200, 50', '  0, 100,   0')) ;
-  detector.components.push(new     hcal_object('hcal_fwd', 0.1 , 2.8,   4.1, 4.5, 3,  2,  6, 0.05, 0.05,  '50,200, 50', '  0, 100,   0')) ;
-  
+  var xml_detector = loadXMLDoc('xml/detector_babar.xml') ;
+  var detector_node = xml_detector.childNodes[0] ;
+  if(true){
+    detector = detector_from_xml(detector_node) ;
+  }
+  else{
+    detector.components.push(new beampipe_object('beampipe', 20, 1.0, '0,0,0')) ;
+    detector.components.push(new  tracker_object('tracker' , 0.05, 0.5, -3.0, 3.0, 6,  1, 12, 0.4 , 0.05, '150,100,150', '200,   0, 200')) ;
+    detector.components.push(new     ecal_object('ecal'    , 0.7 , 1.7, -3.0, 3.0, 2, 12,  6, 0.05, 0.05, '100,100,255', '  0,   0, 100')) ;
+    detector.components.push(new     ecal_object('ecal_fwd', 0.05, 1.7,  3.0, 4.0, 2,  3,  6, 0.05, 0.05, '100,100,255', '  0,   0, 100')) ;
+    detector.components.push(new     hcal_object('hcal'    , 2.0 , 3.0, -4.0, 4.0, 3, 12,  6, 0.09, 0.05, ' 50,200, 50', '  0, 100,   0')) ;
+    detector.components.push(new     hcal_object('hcal_fwd', 0.1 , 2.8,  4.1, 4.5, 3,  2,  6, 0.05, 0.05,  '50,200, 50', '  0, 100,   0')) ;
+  }
   detector.triggers.push(new BaBar_trigger_object()) ;
   
   detector.initialise() ;
   update_coords() ;
+  Get('textarea_detectorXml').innerHTML = print_xml(detector.make_xml_node(),0) ;
   
   draw_detector([]) ;
-  
   
   // Manage reconstruction
   // Base particles
@@ -49,14 +73,11 @@ function start(){
   // Sample composite particle
   collection_names.push('phi') ;
   collections['phi'] = new collection_object('phi', '\\(\\phi\\)', 333, true, false, ['raw_kaons_p','raw_kaons_m']) ;
-  collections['phi']
-  
-  
-  collections['phi'].lowers['m'] =  900 ;
-  collections['phi'].uppers['m'] = 2000 ;
+  collections['phi'].lowers['m'] =  750 ;
+  collections['phi'].uppers['m'] = 2500 ;
   collections['phi'].filter['m'] = true ;
   
-  histograms ['phi'] = new histogram_object('phi', 'mass (KK)',  950,  1300,  35, 'MeV',   '0,100,0') ;
+  histograms ['phi'] = new histogram_object('phi', 'mass (KK)',  750,  2500,  35, 'MeV',   '0,100,0') ;
   plot_spaces['phi'] = new plot_space_object('phi') ;
   plot_names.push('phi') ;
   
@@ -76,6 +97,9 @@ function start(){
   
   Get('input_update_event_display_interval' ).value =  draw_interval ;
   Get('input_update_particle_table_interval').value = table_interval ;
+  Get('input_update_histograms_interval'    ).value = plotspace_draw_interval ;
+  
+  draw_canvas_new_plot_space() ;
   
   window.setTimeout(rerun_mathjax,100) ;
   heartbeat() ;
@@ -83,8 +107,9 @@ function start(){
 }
 
 var mu = 10580 ;
-mu = 4000 ;
+//mu = 4000 ;
 var gammaStar = virtual_photon_object([0,0,0], mu) ;
+//gammaStar = collision_particle([0,0,0], mu) ;
 function heartbeat(){
   if(counter>stop && stop>0) return ;
   if(!pause){
@@ -117,8 +142,9 @@ function heartbeat(){
     }
       
     // Write table early to help with debugging
-    if(counter%table_interval==0) write_particle_info_table(particles) ;
+    //if(counter%table_interval==0) write_particle_info_table(particles) ;
     if(success){
+      n_success++ ;
       // Set all cells to cold
       for(var i=0 ; i<detector.components.length ; i++){
         for(var j=0 ; j<detector.components[i].cells.length ; j++){
@@ -158,12 +184,14 @@ function heartbeat(){
       
       // Draw everything
       // Do this late, to make debugging easier
-      if(counter%draw_interval==0){
+      if((counter%draw_interval)==0){
         draw_detector(paths) ;
       }
-      for(var i=0 ; i<plot_names.length ; i++){
-        if(plot_spaces[plot_names[i]]){
-          plot_spaces[plot_names[i]].draw() ;
+      if((counter%plotspace_draw_interval)==0){
+        for(var i=0 ; i<plot_names.length ; i++){
+          if(plot_spaces[plot_names[i]]){
+            plot_spaces[plot_names[i]].draw() ;
+          }
         }
       }
       
@@ -178,10 +206,14 @@ function heartbeat(){
       // Do this again so we get the reco values as well
       if(counter%table_interval==0) write_particle_info_table(particles) ;
     }
-    
+    else{
+      n_failure++ ;
+    }
     
     counter++ ;
     Get('span_nEvents').innerHTML = events.length + ' / ' + counter ;
+    Get('span_event_success').innerHTML = n_success ;
+    Get('span_event_failure').innerHTML = n_failure ;
   }
   
   // If we're stepping through one event at a time, make sure to pause again after we finish the event

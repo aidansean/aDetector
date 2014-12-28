@@ -11,6 +11,7 @@ function write_particle_info_table(particles){
       var td = Create('td') ;
       td.innerHTML = innerHTML ;
       td.className = className ;
+      if(innerHTML=='NaN') td.className += ' NaN' ;
       tr.appendChild(td) ;
     }
       
@@ -20,8 +21,9 @@ function write_particle_info_table(particles){
     tr.appendChild(td) ;
     
     var mother_id = (p.mother==null) ? '-' : p.mother.id ;
-    tr.add_td('particle_info', i) ;
+    tr.add_td('particle_info', p.id) ;
     tr.add_td('particle_info', p.pdgId) ;
+    tr.add_td('particle_info', p.m0      .toPrecision(precision)) ;
     tr.add_td('particle_info', p.m       .toPrecision(precision)) ;
     tr.add_td('particle_info', p.p4_0.x  .toPrecision(precision)) ;
     tr.add_td('particle_info', p.p4_0.y  .toPrecision(precision)) ;

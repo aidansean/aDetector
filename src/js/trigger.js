@@ -1,7 +1,6 @@
 function BaBar_trigger_object(){
   this.analyse_particles = function(particles){ return true ; } // A very efficient trigger!
 }
-
 function gg_trigger_object(){
   this.analyse_particles = function(particles){
     var n_g = 0 ;
@@ -11,7 +10,6 @@ function gg_trigger_object(){
     return (n_g==2) ;
   }
 }
-
 function mu_trigger_object(){
   this.analyse_particles = function(particles){
     for(var i=0 ; i<particles.length ; i++){
@@ -20,7 +18,6 @@ function mu_trigger_object(){
     return false ;
   }
 }
-
 function mu_mu_trigger_object(){
   this.analyse_particles = function(particles){
     var n_mu_p = 0 ;
@@ -32,7 +29,6 @@ function mu_mu_trigger_object(){
     return (n_mu_m>0 && n_mu_p>0) ;
   }
 }
-
 function e_e_trigger_object(){
   this.analyse_particles = function(particles){
     var n_e_p = 0 ;
@@ -44,7 +40,6 @@ function e_e_trigger_object(){
     return (n_e_m>0 && n_e_p>0) ;
   }
 }
-
 function e_mu_trigger_object(){
   this.analyse_particles = function(particles){
     var has_e  = false ;
@@ -56,7 +51,6 @@ function e_mu_trigger_object(){
     return (has_e && has_mu) ;
   }
 }
-
 function e_OR_mu_trigger_object(){
   this.analyse_particles = function(particles){
     for(var i=0 ; i<particles.length ; i++){
@@ -66,7 +60,6 @@ function e_OR_mu_trigger_object(){
     return false ;
   }
 }
-
 function K_pi_trigger_object(){
   this.analyse_particles = function(particles){
     var has_K  = false ;
@@ -78,7 +71,6 @@ function K_pi_trigger_object(){
     return (has_K && has_pi) ;
   }
 }
-
 function K_K_trigger_object(){
   this.analyse_particles = function(particles){
     var has_Kp = false ;
@@ -90,7 +82,6 @@ function K_K_trigger_object(){
     return (has_Kp && has_Km) ;
   }
 }
-
 function K_K_mu_trigger_object(){
   this.analyse_particles = function(particles){
     var has_Kp = false ;

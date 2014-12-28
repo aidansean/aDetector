@@ -35,6 +35,7 @@ function collection_object(name, title, pdgId, both_charges, is_raw_list, daught
       this.daughter_lists.push( get_collection_by_name(this.daughter_names[i]).list ) ;
     }
     if(this.merge){
+      var results = [] ;
       for(var i=0 ; i<this.daughter_lists.length ; i++){
         for(var j=0 ; j<this.daughter_lists[i].length ; j++){
           var p_in = this.daughter_lists[i][j] ;
@@ -56,6 +57,7 @@ function collection_object(name, title, pdgId, both_charges, is_raw_list, daught
           results.push(p) ;
         }
       }
+      return results ;
     }
     else{
       this.list = combine_lists_of_particles(this.pdgId, this.daughter_lists) ;
@@ -189,6 +191,7 @@ function reset_reco_particle_form(){
   Get('input_reco_pdgId').value = '' ;
   
   for(var i=0 ; i<variable_names.length ; i++){
+    if(!Get('input_reco_'    + variable_names[i] + '_lower')) continue ;
     Get('input_reco_'    + variable_names[i] + '_lower').value = -1e30 ;
     Get('input_reco_'    + variable_names[i] + '_upper').value =  1e30 ;
     Get('checkbox_reco_' + variable_names[i] + '_filter').checked = false ;
@@ -236,7 +239,13 @@ function add_particle_collection_table(collection){
     tbody.appendChild(tr) ;
   }
   
-  var filtered = (collection.filter_mass || collection.filter_p || collection.filter_pt || collection.filter_E || collection.filter_eta || collection.filter_hel || collection.filter_d0) ;
+  var filtered = false ;
+  for(var i=0 ; i<variable_names.length ; i++){
+    if(collection.filter[variable_names[i]]){
+      filtered = true ;
+      break ;
+    }
+  }
   
   if(filtered){
     tr = Create('tr') ;
@@ -246,34 +255,12 @@ function add_particle_collection_table(collection){
     th.innerHTML = 'Filters' ;
     tr.appendChild(th) ;
     tbody.appendChild(tr) ;
-    
-    if(collection.filter_mass){
-      tbody.appendChild(make_particle_table_row('Lower mass'               , collection.mass_lower + ' \\(\\mathrm{MeV}\\)')) ;
-      tbody.appendChild(make_particle_table_row('Upper mass'               , collection.mass_upper + ' \\(\\mathrm{MeV}\\)')) ;
-    }
-    if(collection.filter_p){
-      tbody.appendChild(make_particle_table_row('Lower momentum'           , collection.p_lower    + ' \\(\\mathrm{MeV}\\)')) ;
-      tbody.appendChild(make_particle_table_row('Upper momentum'           , collection.p_upper    + ' \\(\\mathrm{MeV}\\)')) ;
-    }
-    if(collection.filter_pT){
-      tbody.appendChild(make_particle_table_row('Lower transverse momentum', collection.pT_lower   + ' \\(\\mathrm{MeV}\\)')) ;
-      tbody.appendChild(make_particle_table_row('Upper transverse momentum', collection.pT_upper   + ' \\(\\mathrm{MeV}\\)')) ;
-    }
-    if(collection.filter_E){
-      tbody.appendChild(make_particle_table_row('Lower energy'             , collection.E_lower    + ' \\(\\mathrm{MeV}\\)')) ;
-      tbody.appendChild(make_particle_table_row('Upper energy'             , collection.E_upper    + ' \\(\\mathrm{MeV}\\)')) ;
-    }
-    if(collection.filter_eta){
-      tbody.appendChild(make_particle_table_row('Lower pseudorapidity'     , collection.eta_lower )) ;
-      tbody.appendChild(make_particle_table_row('Upper pseudorapidity'     , collection.eta_upper )) ;
-    }
-    if(collection.filter_hel){
-      tbody.appendChild(make_particle_table_row('Lower helicity'           , collection.hel_lower )) ;
-      tbody.appendChild(make_particle_table_row('Upper helicity'           , collection.hel_upper )) ;
-    }
-    if(collection.filter_d0){
-      tbody.appendChild(make_particle_table_row('Lower mass'               , collection.d0_lower   + ' \\(\\mathrm{m}\\)')) ;
-      tbody.appendChild(make_particle_table_row('Upper mass'               , collection.d0_upper   + ' \\(\\mathrm{m}\\)')) ;
+    for(var i=0 ; i<variable_names.length ; i++){
+      var vname = variable_names[i] ;
+      if(collection.filter[vname]){
+        tbody.appendChild(make_particle_table_row('Lower '+vname , collection.lowers[vname])) ;
+        tbody.appendChild(make_particle_table_row('Upper '+vname , collection.uppers[vname])) ;
+      }
     }
   }
   

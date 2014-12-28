@@ -19,14 +19,14 @@ function keyDown(evt){
     //  evt.preventDefault() ;
     //  toggle_pause() ;
     //  break ;
-    case 37: // Left
-      evt.preventDefault() ;
-      previous_event() ;
-      break ;
-    case 39: // Right
-      evt.preventDefault() ;
-      next_event() ;
-      break ;
+    //case 37: // Left
+    //  evt.preventDefault() ;
+    //  previous_event() ;
+    //  break ;
+    //case 39: // Right
+    //  evt.preventDefault() ;
+    //  next_event() ;
+    //  break ;
   }
 }
 
@@ -76,6 +76,8 @@ function update_coords(){
   draw_settings['cutaway'].r0 = r0 ;
   draw_settings['cutaway'].t0 = t0 ;
   draw_settings['cutaway'].p0 = p0 ;
+  
+  draw_detector([]) ;
 }
 
 function change_update_event_dsiplay_interval(){
@@ -88,6 +90,12 @@ function change_update_particle_table_interval(){
   var interval = parseInt(Get('input_update_particle_table_interval').value) ;
   if(isNaN(interval)) return ;
   table_interval = interval ;
+}
+
+function change_update_histograms_interval(){
+  var interval = parseInt(Get('input_update_histograms_interval').value) ;
+  if(isNaN(interval)) return ;
+  plotspace_draw_interval = interval ;
 }
 
 function change_save_events(){
@@ -113,18 +121,19 @@ function select_tab(e){
 
 function add_eventListeners(){
   document.addEventListener('keydown', keyDown) ;
-  Get('submit_coords'  ).addEventListener('click', update_coords  ) ;
-  Get('submit_pause'   ).addEventListener('click', toggle_pause   ) ;
-  Get('submit_stepOne' ).addEventListener('click', step_one_event ) ;
-  Get('submit_previous').addEventListener('click', previous_event ) ;
-  Get('submit_next'    ).addEventListener('click', next_event     ) ;
+  Get('submit_coords'  ).addEventListener('click', update_coords ) ;
+  Get('submit_pause'   ).addEventListener('click', toggle_pause  ) ;
+  Get('submit_stepOne' ).addEventListener('click', step_one_event) ;
+  Get('submit_previous').addEventListener('click', previous_event) ;
+  Get('submit_next'    ).addEventListener('click', next_event    ) ;
   
-  Get('submit_reco_particle_create'    ).addEventListener('click', make_new_reco_particle) ;
-  Get('submit_reco_particle_addList'   ).addEventListener('click', add_reco_particle_collection_tr) ;
+  Get('submit_reco_particle_create'    ).addEventListener('click', make_new_reco_particle            ) ;
+  Get('submit_reco_particle_addList'   ).addEventListener('click', add_reco_particle_collection_tr   ) ;
   Get('submit_reco_particle_removeList').addEventListener('click', remove_reco_particle_collection_tr) ;
   
   Get('submit_update_event_display_interval' ).addEventListener('click', change_update_event_dsiplay_interval ) ;
   Get('submit_update_particle_table_interval').addEventListener('click', change_update_particle_table_interval) ;
+  Get('submit_update_histograms_interval'    ).addEventListener('click', change_update_histograms_interval    ) ;
   Get('submit_update_save_events').addEventListener('click', change_save_events) ;
   
   Get('td_tab_selection_detector' ).addEventListener('click', select_tab) ;
@@ -134,6 +143,6 @@ function add_eventListeners(){
   Get('td_tab_selection_particle' ).addEventListener('click', select_tab) ;
   
   Get('submit_histogram_create').addEventListener('click', create_histogram) ;
-  Get('submit_new_plot_space'  ).addEventListener('click', create_plotSpace) ;
   Get('submit_fill_histogram'  ).addEventListener('click', submit_fillHisto) ;
+  Get('canvas_new_plot_space'  ).addEventListener('click', create_plotSpace) ;
 }

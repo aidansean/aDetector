@@ -1,10 +1,72 @@
+var particle_species = ['photon' , 'electron' , 'muon' , 'tau' , 'neutrino' , 'ephemeral_hadron' , 'charged_hadron' , 'neutral_hadron'] ;
+
+function particle_base_object(){
+  // mass and width
+  this.m = 0 ;
+  this.w = 0 ;
+  this.q = 0 ;
+  
+  this.type   = 'generic' ;
+  this.color  = generic_color ;
+  this.pdgId  = 0 ;
+  this.matter = 0 ;
+  
+  this.decays  = [] ;
+  this.decays_ = [] ;
+  this.normalise_decays = function(){
+    if(this.decays.length==0) return ;
+    var total = 0 ;
+    for(var i=0 ; i<this.decays.length ; i++){
+      total += this.decays[i][0] ;
+    }
+    for(var i=0 ; i<this.decays.length ; i++){
+      this.decays[i][0] /= total ;
+      this.decays_.push(new decay_object(this.decays[i][0], this.decays[i][1])) ;
+    }
+  }
+  this.make_xml_node = function(){
+    var element = xmlDoc.createElement('particle') ;
+    element.setAttribute('pdgId' , this.pdgId ) ;
+    element.setAttribute('type'  , this.type  ) ;
+    element.setAttribute('color' , this.color ) ;
+    element.setAttribute('matter', this.matter) ;
+    element.setAttribute('m'     , this.m     ) ;
+    element.setAttribute('w'     , this.w     ) ;
+    element.setAttribute('q'     , this.q     ) ;
+    
+    var decay_list = xmlDox.createElement('decay_list') ;
+    for(var i=0 ; i<this.decays_.length ; i++){
+      var decay_node = this.decays_[i].make_xml_node() ;
+      decay_list.appendChild(decay_node) ;
+    }
+    element.appendChild(decay_list) ;
+    return element ;
+  }
+}
+
+function decay_object(f, ps){
+  this.f =  f ; // Relative branching fraction
+  this.ps = ps ; // Decay products
+  this.make_xml_node = function(){
+    var element = xmlDoc.createElement('decay') ;
+    element.setAttribute('f',this.f) ;
+    for(var i=0 ; i<this.ps.length ; i++){
+      var p_node = xmlDoc.createElement('product') ;
+      p_node.setAttribute('pdgId', this.ps[i]) ;
+      element.appendChild(p_node) ;
+    }
+  }
+}
+
 function particle_object(m, q, r0, unstable){
   // Intrinsic properties
-  this.q = q ;
-  this.m = m ;
+  this.q  = q ;
+  this.m  = m ;
+  this.m0 = m ; // Pole mass
   
   // r and p values
   this.r_0  = make_point(r0[0],r0[1],r0[2]) ;
+  this.r_r  = make_point(0,0,0) ;
   this.p4_0 = new fourVector() ;
   this.p4_r = new fourVector() ;
   
@@ -55,18 +117,17 @@ function particle_object(m, q, r0, unstable){
     if(block.type=='ecal'   ) this.add_ecal_block   (xyz, p4, block) ;
     if(block.type=='hcal'   ) this.add_hcal_block   (xyz, p4, block) ;
   }
-  
   this.add_tracker_block = function(xyz, p4, block){
     if(this.q==0) return ;
     this.tracker_blocks.push([xyz,block,p4]) ;
     if(block.cell) block.cell.make_hot(true) ;
   }
-  this.add_ecal_block = function(xyz, p4, block){
+  this.add_ecal_block    = function(xyz, p4, block){
     if(p4[4]<1) return ;
     this.ecal_blocks.push([xyz,block,p4]) ;
     if(block.cell) block.cell.make_hot(true) ;
   }
-  this.add_hcal_block = function(xyz, p4, block){
+  this.add_hcal_block    = function(xyz, p4, block){
     if(p4[4]<1) return ;
     this.hcal_blocks.push([xyz,block,p4]) ;
     if(block.cell) block.cell.make_hot(true) ;
@@ -292,6 +353,7 @@ function particle_object(m, q, r0, unstable){
   }
   
   this.reconstruct = function(){
+    // First set all the values to the true values, then replace them one by one
     this.p4_r.x = this.p4_0.x ;
     this.p4_r.y = this.p4_0.y ;
     this.p4_r.z = this.p4_0.z ;
@@ -310,8 +372,8 @@ function particle_object(m, q, r0, unstable){
     // Require at least three hits to get a good measure of pT and pz
     // pT is proportional to radius of curvature
     // So make pT resolution proportional to 1/sqrt(n_hits) for n_hits>3
-    var pt_reco = this.p4_0.pT() ;
-    var pz_reco = this.p4_0.z ;
+    var pt_reco = -1 ;
+    var pz_reco = -1 ;
     if(this.n_tracker_hits>=3 && this.q!=0){
       var  pt_params = get_pt_from_hits(this.tracker_blocks, this.q, B_field, this.p4_0.pT()) ;
       this.pt_hits_mean  = pt_params[0] ;
@@ -319,6 +381,8 @@ function particle_object(m, q, r0, unstable){
       pt_reco = this.pt_hits_mean + random_gaussian(this.pt_hits_sigma) ;
       pz_reco = this.p4_0.z*pt_reco/this.p4_0.pT() ;
     }
+    if(pt_reco<0) pt_reco = this.p4_0.pT() ;
+    if(pz_reco<0) pz_reco = this.p4_0.z    ;
     
     this.px_reco = pt_reco*cos(this.p4_0.phi()) ;
     this.py_reco = pt_reco*sin(this.p4_0.phi()) ;
@@ -330,6 +394,53 @@ function particle_object(m, q, r0, unstable){
     this.p4_r.z = this.pz_reco ;
     this.p4_r.t = this. E_reco ;
   }
+  
+  this.make_xml_node = function(){
+    var element = xmlDoc.createElement('particle') ;
+    element.setAttribute('pdgId'    , this.pdgId   ) ;
+    element.setAttribute('type'     , this.type    ) ;
+    element.setAttribute('m0'       , this.m0      ) ;
+    element.setAttribute('m'        , this.m       ) ;
+    element.setAttribute('w'        , this.w       ) ;
+    element.setAttribute('q'        , this.q       ) ;
+    element.setAttribute('matter'   , this.matter  ) ;
+    element.setAttribute('unstable' , this.unstable) ;
+    
+    element.setAttribute('x_0' , this.r_0.x) ;
+    element.setAttribute('y_0' , this.r_0.y) ;
+    element.setAttribute('z_0' , this.r_0.z) ;
+    element.setAttribute('x_r' , this.r_r.x) ;
+    element.setAttribute('y_r' , this.r_r.y) ;
+    element.setAttribute('z_r' , this.r_r.z) ;
+    
+    element.setAttribute('px_0', this.p4_0.x) ;
+    element.setAttribute('py_0', this.p4_0.y) ;
+    element.setAttribute('pz_0', this.p4_0.z) ;
+    element.setAttribute('E_0' , this.p4_0.t) ;
+    element.setAttribute('px_r', this.p4_r.x) ;
+    element.setAttribute('py_r', this.p4_r.y) ;
+    element.setAttribute('pz_r', this.p4_r.z) ;
+    element.setAttribute('E_r' , this.p4_r.t) ;
+    
+    return element ;
+  }
+}
+
+function particle_from_xml(node){
+  var m0 = node.getAttribute('m0') ;
+  var q  = node.getAttribute('q' ) ;
+  var r0 = [node.getAttribute('x_0'),node.getAttribute('y_0'),node.getAttribute('z_0')] ;
+  var unstable = node.getAttribute('unstable') ;
+  var par = new particle_object(m0, q, r0, unstable) ;
+  
+  par.p4_0.x = node.getAttribute('px_0') ;
+  par.p4_0.y = node.getAttribute('py_0') ;
+  par.p4_0.z = node.getAttribute('pz_0') ;
+  par.p4_0.t = node.getAttribute('E_0' ) ;
+  par.p4_r.x = node.getAttribute('px_r') ;
+  par.p4_r.y = node.getAttribute('py_r') ;
+  par.p4_r.z = node.getAttribute('pz_r') ;
+  par.p4_r.t = node.getAttribute('E_r' ) ;
 }
 
 function recursively_decay_daughters(particle){
@@ -384,7 +495,14 @@ function multibody_decay(pdgId, p4, daughters, depth){
   
   if(daughters.length==1){
     var d = daughters[0] ;
-    if(d.pdgId!=999){ d.m = random_simple_truncated_cauchy(d.m, d.w, 0, p4.m()) ; }
+    if(d.pdgId!=999 && d.w>1e-3){
+      // First make sure the mass is sufficient for subsequent decays
+      var m_min = 0 ;
+      for(var i=0 ; i<d.daughters.length ; i++){
+        m_min += d.daughters[i].m ;
+      }
+      d.m = random_simple_truncated_cauchy(d.m, d.w, m_min, p4.m()) ;
+    }
     var p2 = p4.x*p4.x+p4.y*p4.y+p4.z*p4.z ;
     var E  = sqrt(d.m*d.m+p2) ;
     d.p4_0.x = p4.x ;
@@ -395,37 +513,49 @@ function multibody_decay(pdgId, p4, daughters, depth){
     return daughters ;
   }
   
+  var bv = p4.boostVector() ;
+  var m  = p4.m() ;
+  
   // Sort daughters randomly
   var daughters_with_indices = [] ;
   for(var i=0 ; i<daughters.length ; i++){ daughters_with_indices.push([random(),daughters[i]]) ; }
   daughters_with_indices.sort(function(a,b){ return a[0] < b[0] ; }) ;
   for(var i=0 ; i<daughters.length ; i++){ daughters[i] = daughters_with_indices[i][1] ; }
   
-  var bv = p4.boostVector() ;
-  var m = p4.m() ;
-  var d = daughters.pop() ;
+  var d  = daughters.pop() ;
   
-  // Choose a random momentum for the first daughter
+  // Choose a random mass based on the truncated Cauchy distribution to conserve p4
   var mbar = 0 ;
   for(var i=0 ; i<daughters.length ; i++){
     mbar += daughters[i].p4_0.m() ;
   }
-  
-  // Choose a random mass based on the truncated Cauchy distribution to conserve p4
+  var m_max = (m-mbar) ;
+    
   // Leave enough energy for the daughters and siblings
   var m_min = 0 ;
   for(var i=0 ; i<d.daughters.length ; i++){
     m_min += d.daughters[i].m ;
   }
-  var m_max = (m-mbar) ;
+  
   var mi = d.m ;
-  if(d.w>1) mi = random_simple_truncated_cauchy(d.m, d.w, m_min, m_max) ;
+  if(d.w>1e-3){
+    mi = random_simple_truncated_cauchy(d.m, d.w, m_min, m_max) ;
+  }
+  //if(mi+mbar>m) mi = m-mbar ;
   d.m = mi ;
   d.p4_0.t = sqrt(d.p4_0.p2()+mi*mi) ;
   
-  //var mi = d.p4_0.m() ;
   var pmax = momentum_two_body_decay(m, mi, mbar) ;
-  var p = (daughters.length==1) ? pmax : 0.9*random()*pmax ;
+  if(isNaN(pmax) && !isNaN(m) && !isNaN(mi) && !isNaN(mbar)){
+    Get('pre_info').innerHTML +=
+        '  ' + pdgId + ':' + d.pdgId + 
+        ' ' + m.toPrecision(3)     +
+        ' ' + mi.toPrecision(3)    +
+        ' ' + mbar.toPrecision(3)  +
+        ' ' + m_min.toPrecision(3) +
+        ' ' + m_max.toPrecision(3) + '\n' ;
+  }
+  var p = (daughters.length==1) ? pmax : random()*pmax ;
   
   // Make the three vectors and boost the first daughter in one direction, and the rest in the other
   var p3 = random_threeVector(p) ;
@@ -451,22 +581,6 @@ function multibody_decay(pdgId, p4, daughters, depth){
     multibody_decay(daughters[i].pdgId, daughters[i].p4_0, daughters[i].daughters, depth+1) ;
   }
   return daughters ;
-}
-
-function m_from_particles(particles){
-  var x = 0 ;
-  var y = 0 ; 
-  var z = 0 ;
-  var t = 0 ;
-  for(var i=0 ; i<particles.length ; i++){
-    x += particles.p4_0.x ;
-    y += particles.p4_0.y ;
-    z += particles.p4_0.z ;
-    t += particles.p4_0.t ;
-  }
-  var m2 = t*t-x*x-y*y-z*z ;
-  if(m2>0) return sqrt(m2) ;
-  return sqrt(-m2) ;
 }
 
 function smear_p(particles, value){

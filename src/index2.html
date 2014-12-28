@@ -6,6 +6,7 @@
 <link type="text/css" rel="stylesheet" media="all" href="/css/style.php" />
 <link type="text/css" rel="stylesheet" media="all" href="style.css" />
 <script type="text/javascript" src="helper.js"></script>
+<script type="text/javascript" src="xml.js"></script>
 <script type="text/javascript" src="p4.js"></script>
 <script type="text/javascript" src="event.js"></script>
 <script type="text/javascript" src="settings.js"></script>
@@ -98,65 +99,65 @@
   </div>
   
   <div id="div_histogram_container">
-    <div id="histogram_wrapper" class="center">
-    </div>
+    <h3>Histograms</h3>
+    <div id="histogram_wrapper" class="center"></div>
   
     <table id="table_histogram_first" class="reco_particle">
-    <tbody>
-      <tr><th class="histogram_heading" colspan="3">Create histogram</th></tr>
-      <tr>
-        <th>Name:</th>
-        <td><input id="input_histogram_name" type="text" value=""/></td>
-        <td>(Unique, only letters and numbers)</td>
-      </tr>
-      <tr>
-        <th>x-axis tite:</th>
-        <td><input id="input_histogram_xaxis" type="text" value=""/></td>
-        <td>(Optional, LaTeX supported)</td>
-      </tr>
-      <tr>
-        <th>Unit:</th>
-        <td><input id="input_histogram_unit" type="text" value=""/></td>
-        <td>(Optional)</td>
-      </tr>
-      <tr>
-        <th>Lower bound:</th>
-        <td><input id="input_histogram_lower" type="text" value=""/></td>
-        <td>(Required)</td>
-      </tr>
-      <tr>
-        <th>Upper bound:</th>
-        <td><input id="input_histogram_upper" type="text" value=""/></td>
-        <td>(Required)</td>
-      </tr>
-      <tr>
-        <th>Number of bins:</th>
-        <td><input id="input_histogram_nBins" type="text" value=""/></td>
-        <td>(Required)</td>
-      </tr>
-      <tr>
-        <th>Colour:</th>
-        <td><input id="input_histogram_colour" type="text" value=""/></td>
-        <td>(Optional, default is black)</td>
-      </tr>
-      <tr>
-        <td class="center" colspan="3"><input id="submit_histogram_create" type="submit" value="Create histogram!"/></td>
-      </tr>
-    </tbody>
-  </table>
+      <tbody>
+        <tr><th class="histogram_heading" colspan="3">Create histogram</th></tr>
+        <tr>
+          <th>Name:</th>
+          <td><input id="input_histogram_name" type="text" value=""/></td>
+          <td>(Unique, only letters and numbers)</td>
+        </tr>
+        <tr>
+          <th>x-axis tite:</th>
+          <td><input id="input_histogram_xaxis" type="text" value=""/></td>
+          <td>(Optional, LaTeX supported)</td>
+        </tr>
+        <tr>
+          <th>Unit:</th>
+          <td><input id="input_histogram_unit" type="text" value=""/></td>
+          <td>(Optional)</td>
+        </tr>
+        <tr>
+          <th>Lower bound:</th>
+          <td><input id="input_histogram_lower" type="text" value=""/></td>
+          <td>(Required)</td>
+        </tr>
+        <tr>
+          <th>Upper bound:</th>
+          <td><input id="input_histogram_upper" type="text" value=""/></td>
+          <td>(Required)</td>
+        </tr>
+        <tr>
+          <th>Number of bins:</th>
+          <td><input id="input_histogram_nBins" type="text" value=""/></td>
+          <td>(Required)</td>
+        </tr>
+        <tr>
+          <th>Colour:</th>
+          <td><input id="input_histogram_colour" type="text" value=""/></td>
+          <td>(Optional, default is black)</td>
+        </tr>
+        <tr>
+          <td class="center" colspan="3"><input id="submit_histogram_create" type="submit" value="Create histogram!"/></td>
+        </tr>
+      </tbody>
+    </table>
     
     <table id="table_histogram_roster">
-    <thead>
-      <tr>
-        <th class="histogram_roster">Name</th>
-        <th class="histogram_roster">\(x\) axis title</th>
-        <th class="histogram_roster">Unit</th>
-        <th class="histogram_roster">\(x_{low}\)</th>
-        <th class="histogram_roster">\(x_{high}\)</th>
-        <th class="histogram_roster">Bins</th>
-        <th class="histogram_roster">Colour</th>
-      </tr>
-    </thead>
+      <thead>
+        <tr>
+          <th class="histogram_roster">Name</th>
+          <th class="histogram_roster">\(x\) axis title</th>
+          <th class="histogram_roster">Unit</th>
+          <th class="histogram_roster">\(x_{low}\)</th>
+          <th class="histogram_roster">\(x_{high}\)</th>
+          <th class="histogram_roster">Bins</th>
+          <th class="histogram_roster">Colour</th>
+        </tr>
+      </thead>
     <tbody id="tbody_histogram_roster"></tbody>
   </table>
   </div>

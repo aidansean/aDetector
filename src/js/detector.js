@@ -4,6 +4,30 @@ function particle_trajectory(path_xyz, path_p, color){
   this.color = color    ;
 }
 
+function detector_from_xml(node){
+  var detector = new detector_object() ;
+  var component_list_node = null ;
+  if(node.nodeName=='component_list'){
+    component_list_node = node ;
+    alert(node.nodeName) ;
+  }
+  else{
+    for(var i=0 ; i<node.childNodes.length ; i++){
+      if(node.childNodes[i].nodeName=='component_list'){
+        component_list_node = node.childNodes[i] ;
+        break ;
+      }
+    }
+  }
+  for(var i=0 ; i<component_list_node.childNodes.length ; i++){
+    if(component_list_node.childNodes[i].nodeName=='detector_component'){
+      var component = detector_component_from_xml(component_list_node.childNodes[i]) ;
+      if(component) detector.components.push(component) ;
+    }
+  }
+  return detector ;
+}
+
 function detector_object(){
   this.components = [] ;
   this.triggers   = [] ;
@@ -201,6 +225,17 @@ function detector_object(){
     }
     var traj = new particle_trajectory(points_xyz, points_p, particle.color) ;
     return traj ;
+  }
+  
+  this.make_xml_node = function(){
+    var element = xmlDoc.createElement('detector') ;
+    var component_list = xmlDoc.createElement('component_list') ;
+    for(var i=0 ; i<this.components.length ; i++){
+      var component_node = this.components[i].make_xml_node() ;
+      component_list.appendChild(component_node) ;
+    }
+    element.appendChild(component_list) ;
+    return element ;
   }
 }
 

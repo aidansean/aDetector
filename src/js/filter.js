@@ -1,4 +1,4 @@
-var variable_names = ['m','E','p','pT','eta','phi','hel','d0'] ;
+var variable_names = ['m','E','p','pT','eta','phi','hel','d0','er','hr'] ;
 
 function variable_object(name, title, latex, unit){
   this.name  = name  ;
@@ -86,7 +86,7 @@ var v_eta = new variable_object('eta', 'Pseudorapidity', '\\eta', '') ;
 v_eta.get_value = function(p){ return p.p4_r.eta() ; } ;
 variables_list['eta'] = v_eta ;
 
-var v_phi = new variable_object('phi', 'phi', '\\phi') ;
+var v_phi = new variable_object('phi', 'phi', '\\phi', '') ;
 v_phi.get_value = function(p){ return p.p4_r.phi() ; } ;
 variables_list['phi'] = v_phi ;
 
@@ -97,6 +97,15 @@ variables_list['hel'] = v_hel ;
 var v_d0 = new variable_object('d0', 'Transverse impact', 'd_0', 'm') ;
 v_d0.get_value = function(p){ return p.r_0.d0() ; } ;
 variables_list['d0'] = v_d0 ;
+
+var v_er = new variable_object('er', 'ecal response', 'E(ecal)/E(true)', '') ;
+v_er.get_value = function(p){ return p.ecal_energy/p.p4_0.t ; } ;
+variables_list['er'] = v_er ;
+
+var v_hr = new variable_object('hr', 'hcal response', 'E(hcal)/E(true)', '') ;
+v_hr.get_value = function(p){ return p.hcal_energy/p.p4_0.t ; } ;
+variables_list['hr'] = v_hr ;
+
 
 function filter_list_of_particles_by_pdgId(list, pdgId, both_charges){
   var results = [] ;

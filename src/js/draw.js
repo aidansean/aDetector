@@ -150,7 +150,6 @@ draw_settings['longitudinal'] = new draw_settings_object(make_point(-5,0,0),  0.
 
 function draw_all(particles){
   draw_detector(particles) ;
-  histogram.draw(ps, 'e') ;
 }
 
 // Draw all three views of the detector

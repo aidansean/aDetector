@@ -10,24 +10,25 @@ function histogram_object(name, xaxis_title, lower, upper, nBins, units, fill_co
   this.yaxis_title = 'entries per ' + this.binWidth.toPrecision(2) + ' ' + units ;
   this.default_color = 'rgb(0,0,0)' ;
   this.locked = false ;
-  
+  this.events = 0 ;
+    
   this.underflow = 0 ;
   this.overflow  = 0 ;
   this.bins        = [] ;
   this.bin_errors  = [] ;
   this.active_bins = [] ;
   for(var i=0 ; i<=this.nBins ; i++){
-    this.bins.push(0) ;
-    this.bin_errors.push(0) ;
-    this.active_bins.push(false) ;
+    var l = this.lower + (this.upper-this.lower)*(i+0)/this.nBins ;
+    var u = this.lower + (this.upper-this.lower)*(i+1)/this.nBins ;
+    this.bins.push(new histogram_bin(l, u, 0, 0, i)) ;
   }
   
-  this.bin_lower = function(index){ return this.lower + (this.upper-this.lower)*(index+0)/this.nBins ; }
-  this.bin_upper = function(index){ return this.lower + (this.upper-this.lower)*(index+1)/this.nBins ; }
+  this.bin_lower = function(index){ this.bins[index].lower ; }
+  this.bin_upper = function(index){ this.bins[index].upper ; }
   this.get_sum = function(){
     var sum = 0 ;
     for(var bin=1 ; bin<this.nBins ; bin++){
-      sum += this.bins[bin] ;
+      sum += this.bins[bin].value ;
     }
     return sum ;
   }
@@ -35,6 +36,9 @@ function histogram_object(name, xaxis_title, lower, upper, nBins, units, fill_co
   this.xaxis = new axis_object(this.lower, this.upper, this.nBins, this.xaxis_title, this.units, 'x') ;
   this.yaxis = new axis_object(         0,          1,          0, this.yaxis_title, this.units, 'y') ;
   
+  this.update_events = function(){
+    this.events += prescale ;
+  }
   this.fill_array = function(x){
     for(var i=0 ; i<x.length ; i++){
       this.fill(x[i], 1.0/x.length) ;
@@ -42,7 +46,7 @@ function histogram_object(name, xaxis_title, lower, upper, nBins, units, fill_co
   }
   this.fill = function(x,w){
     if(w==null || w==undefined) w = 1 ;
-    if(x<this.lower){
+    if(x<=this.lower){
       this.underflow += w ;
       return ;
     }
@@ -50,10 +54,12 @@ function histogram_object(name, xaxis_title, lower, upper, nBins, units, fill_co
       this.overflow += w ;
       return ;
     }
-    var bin = floor(this.nBins*(x-this.lower)/(this.upper-this.lower)) ;
-    this.active_bins[bin]  = true ;
-    this.bins       [bin] += w    ;
-    this.bin_errors [bin] += w*w  ;
+    if(isNaN(x)) return ;
+    var index = floor(this.nBins*(x-this.lower)/(this.upper-this.lower)) ;
+    var bin = this.bins[index] ;
+    bin.active = true ;
+    bin.value += w ;
+    bin.error += w*w ;
   }
   this.draw = function(plot_space, options){
     var ml = plot_space.margin_left   ;
@@ -79,9 +85,10 @@ function histogram_object(name, xaxis_title, lower, upper, nBins, units, fill_co
     if(options.indexOf('s')==-1){
       var bin_error_max = 1 ;
       for(var i=0 ; i<nBins ; i++){
-        if(this.bins[i]+sqrt(this.bin_errors[i])>bin_max){
-          bin_max = this.bins[i]+sqrt(this.bin_errors[i]) ;
-          bin_error_max = this.bin_errors[i] ;
+        var value = this.bins[i].value+sqrt(this.bins[i].error)
+        if(value>bin_max){
+          bin_max = value ;
+          bin_error_max = this.bins[i].error ;
         }
       }
       if(bin_max>5e2){ bin_max *= 1.25 ; }
@@ -98,14 +105,14 @@ function histogram_object(name, xaxis_title, lower, upper, nBins, units, fill_co
       c.lineWidth = 2 ;
       c.moveTo(ml,ch-mb) ;
     }
-    for(var bin=0 ; bin<nBins ; bin++){
-      if(this.bin_lower(bin)<xl) continue ;
-      if(this.bin_upper(bin)>xu) continue ;
-      var value = this.bins[bin] ;
-      var error = this.bin_errors[bin] ;
-      var u1 = ml + pw*(bin+0.0)/nBins ;
-      var u2 = ml + pw*(bin+0.5)/nBins ;
-      var u3 = ml + pw*(bin+1.0)/nBins ;
+    for(var i=0 ; i<nBins ; i++){
+      if(this.bins[i].lower<xl) continue ;
+      if(this.bins[i].upper>xu) continue ;
+      var value = this.bins[i].value ;
+      var error = this.bins[i].error ;
+      var u1 = ml + pw*(i+0.0)/nBins ;
+      var u2 = ml + pw*(i+0.5)/nBins ;
+      var u3 = ml + pw*(i+1.0)/nBins ;
       
       if(options.indexOf('e')!=-1){ // Error bars
         if(value==0) continue ;
@@ -113,7 +120,7 @@ function histogram_object(name, xaxis_title, lower, upper, nBins, units, fill_co
         c.strokeStyle = this.default_color ;
         c.fillStyle   = 'rgb(' + this.fill_color + ')' ;
         c.strokeStyle = 'rgb(' + this.fill_color + ')' ;
-        if(this.active_bins[bin]){ c.fillStyle   = 'rgb(255,255,255)' ; }
+        if(this.bins[i].active){ c.fillStyle   = 'rgb(255,255,255)' ; }
         
         var v = ch - mb - ph*value/bin_max ;
         var r = min(0.5*pw/nBins,5) ;
@@ -160,7 +167,7 @@ function histogram_object(name, xaxis_title, lower, upper, nBins, units, fill_co
       this.xaxis.draw(plot_space, 0) ;
       this.yaxis.draw(plot_space, bin_max) ;
     }
-    for(var i=0 ; i<this.nBins ; i++){ this.active_bins[i] = false ; }
+    for(var i=0 ; i<this.nBins ; i++){ this.bins[i].active = false ; }
   }
   this.update_histogram_roster = function(){
     var id = 'tr_histogram_roster_' + this.name ;
@@ -180,6 +187,45 @@ function histogram_object(name, xaxis_title, lower, upper, nBins, units, fill_co
   }
   this.update_histogram_roster() ;
   update_select_fill_histogram_histogram(this.name) ;
+  
+  this.make_xml_node = function(){
+    var element = xmlDoc.createElement('histogram') ;
+    element.setAttribute('name' , this.name ) ;
+    element.setAttribute('lower', this.lower) ;
+    element.setAttribute('upper', this.upper) ;
+    element.setAttribute('nBins', this.nBins) ;
+    element.setAttribute('units', this.units) ;
+    element.setAttribute('xaxis_title', this.xaxis_title) ;
+    element.setAttribute('fill_color' , this.fill_color ) ;
+    element.setAttribute('underflow'  , this.underflow  ) ;
+    element.setAttribute('overflow'   , this.overflow   ) ;
+    
+    var bin_list = xmlDoc.createElement('bin_list') ;
+    for(var i=0 ; i<this.nBins ; i++){
+      var bin_node = this.bins[i].make_xml_node() ;
+      bin_list.appendChild(bin_node) ;
+    }
+    element.appendChild(bin_list) ;
+    
+    return element ;
+  }
+}
+function histogram_bin(lower, upper, value, error, index){
+  this.lower  = lower ;
+  this.upper  = upper ;
+  this.value  = value ;
+  this.error  = error ;
+  this.active = false ;
+  this.index  = index ;
+  this.make_xml_node = function(){
+    var element = xmlDoc.createElement('bin') ;
+    element.setAttribute('lower', this.lower) ;
+    element.setAttribute('upper', this.upper) ;
+    element.setAttribute('value', this.value) ;
+    element.setAttribute('error', this.error) ;
+    element.setAttribute('index', this.index) ;
+    return element ;
+  }
 }
 function axis_object(lower, upper, nBins, title, units, coord){
   this.lower = lower ;
@@ -250,7 +296,8 @@ function axis_object(lower, upper, nBins, title, units, coord){
         c.lineTo(u, v1-this.small_tick_length) ;
         c.moveTo(u, v2                       ) ;
         c.lineTo(u, v2+this.small_tick_length) ;
-        c.fillText(x, u, v1+10) ;
+        var x_text = (abs(x)<1) ? x.toPrecision(2) : x ;
+        c.fillText(x_text, u, v1+10) ;
       }
       c.stroke() ;
       
@@ -275,7 +322,7 @@ function axis_object(lower, upper, nBins, title, units, coord){
         c.moveTo(u2                       , v) ;
         c.lineTo(u2-this.small_tick_length, v) ;
         if(range_power>2){ c.fillText(y/pow(10,range_power).toPrecision(2), u1-5, v) ; }
-        else{ c.fillText(y, u1-5, v) ; }
+        else{ c.fillText(y.toPrecision(2), u1-5, v) ; }
       }
       c.stroke() ;
       
@@ -297,6 +344,24 @@ function axis_object(lower, upper, nBins, title, units, coord){
       c.restore() ;
     }
   }
+}
+function histogram_from_xml(node){
+  var name  = node.getAttribute('name') ;
+  var lower = node.getAttribute('lower') ;
+  var upper = node.getAttribute('upper') ;
+  var nBins = node.getAttribute('nBins') ;
+  var units = node.getAttribute('units') ;
+  var fill_color  = node.getAttribute('fill_color' ) ;
+  var xaxis_title = node.getAttribute('xaxis_title') ;
+  var h = new histogram_object(name, xaxis_title, lower, upper, nBins, units, fill_color) ;
+  h.bins        = get_array_from_xml(node, 'bin_values' ) ;
+  h.bin_errors  = get_array_from_xml(node, 'bin_errors' ) ;
+  h.active_bins = get_array_from_xml(node, 'active_bins') ;
+  
+  if(name in histograms) return h ;
+  histograms[name] = h ;
+  h.update_histogram_roster() ;
+  return null ;
 }
 
 function create_histogram(){
@@ -372,7 +437,7 @@ function plot_space_object(suffix){
   this.div.id = 'div_plot_'+suffix ;
   this.div.style.width = '260px' ;
   this.div.style.display = 'inline-block' ;
-  Get('plot_space_wrapper').appendChild(this.div) ;
+  Get('plot_space_wrapper').insertBefore(this.div, Get('submit_new_plot_space')) ;
   
   this.canvas = Create('canvas') ;
   this.canvas.id = 'canvas_plot_'+suffix ;

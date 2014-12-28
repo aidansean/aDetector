@@ -72,6 +72,17 @@ function make_particle(pdgId, r0){
     case -521: return new        B_object(-1, r0) ; break ;
     case  531: return new       Bs_object( 1, r0) ; break ;
     case -531: return new       Bs_object(-1, r0) ; break ;
+    case  541: return new       Bc_object( 1, r0) ; break ;
+    case -541: return new       Bc_object(-1, r0) ; break ;
+    
+    case  513: return new   B0Star_object( 1, r0) ; break ;
+    case -513: return new   B0Star_object(-1, r0) ; break ;
+    case  523: return new    BStar_object( 1, r0) ; break ;
+    case -523: return new    BStar_object(-1, r0) ; break ;
+    case  533: return new   BsStar_object( 1, r0) ; break ;
+    case -533: return new   BsStar_object(-1, r0) ; break ;
+    case  543: return new   BcStar_object( 1, r0) ; break ;
+    case -543: return new   BcStar_object(-1, r0) ; break ;
     
     // Charmonium
     case -441:
@@ -99,6 +110,7 @@ var proton_color   = ' 50,100,250' ;
 
 // Try to follow the same order as the PDG
 
+// Leptons
 function photon_object(r0){
   var par = new particle_object(0, 0, r0, false) ;
   par.color = photon_color ;
@@ -110,7 +122,6 @@ function photon_object(r0){
   par.normalise_decays() ;
   return par ;
 }
-
 function electron_object(q, r0){
   var par = new particle_object(0.511, q, r0, false) ;
   par.color = electron_color ;
@@ -122,7 +133,6 @@ function electron_object(q, r0){
   par.normalise_decays() ;
   return par ;
 }
-
 function muon_object(q, r0){
   var par = new particle_object(105.7, q, r0, false) ;
   par.color = muon_color ;
@@ -134,7 +144,6 @@ function muon_object(q, r0){
   par.normalise_decays() ;
   return par ;
 }
-
 function tau_object(q, r0){
   var par = new particle_object(1777, q, r0, false) ;
   par.color = tau_color ;
@@ -156,7 +165,6 @@ function tau_object(q, r0){
   par.normalise_decays() ;
   return par ;
 }
-
 function nu_object(q, r0){
   var par = new particle_object(1e-6, 0, r0, false) ;
   par.color = neutrino_color ;
@@ -184,7 +192,6 @@ function pi0_object(r0){
   par.normalise_decays() ;
   return par ;
 }
-
 function pi_object(q, r0){
   var par = new particle_object(139.6, q, r0, false) ;
   par.color = pion_color ;
@@ -195,7 +202,6 @@ function pi_object(q, r0){
   par.decays = [] ;
   return par ;
 }
-
 function rho_object(q, r0){
   var par = new particle_object(770.0, q, r0, true) ;
   par.color = generic_color ;
@@ -213,7 +219,6 @@ function rho_object(q, r0){
   //par.p4_0.t = E ;
   return par ;
 }
-
 function rho0_object(r0){
   var par = new particle_object(770.0, 0, r0, true) ;
   par.color = generic_color ;
@@ -235,7 +240,6 @@ function rho0_object(r0){
   //par.p4_0.t = E ;
   return par ;
 }
-
 function eta_object(r0){
   var par = new particle_object(547.9, 0, r0, true) ;
   par.color = generic_color ;
@@ -257,7 +261,6 @@ function eta_object(r0){
   //par.p4_0.t = E ;
   return par ;
 }
-
 function etap_object(r0){
   var par = new particle_object(957.8, 0, r0, true) ;
   par.color = generic_color ;
@@ -279,7 +282,6 @@ function etap_object(r0){
   //par.p4_0.t = E ;
   return par ;
 }
-
 function omega_object(r0){
   var par = new particle_object(782.7, 0, r0, true) ;
   par.color = generic_color ;
@@ -298,7 +300,6 @@ function omega_object(r0){
   //par.p4_0.t = E ;
   return par ;
 }
-
 function phi_object(r0){
   var par = new particle_object(1020.0, 0, r0, true) ;
   par.color = generic_color ;
@@ -331,7 +332,6 @@ function K_object(q, r0){
   par.normalise_decays() ;
   return par;
 }
-
 function KS_object(r0){
   var par = new particle_object(497.6, 0, r0, false) ;
   par.color = kaon_color ;
@@ -348,7 +348,6 @@ function KS_object(r0){
   par.normalise_decays() ;
   return par ;
 }
-
 function KL_object(r0){
   var par = new particle_object(497.6, 0, r0, false) ;
   par.color = generic_color ;
@@ -392,7 +391,6 @@ function K892_object(q, r0){
   //par.p4_0.t = E ;
   return par;
 }
-
 function K892_0_object(q, r0){
   var par = new particle_object(892, 0, r0, true) ;
   par.color = kaon_color ;
@@ -436,7 +434,6 @@ function D_object(q, r0){
   par.normalise_decays() ;
   return par ;
 }
-
 function D0_object(q, r0){
   var par = new particle_object(1865, 0, r0, true) ;
   par.color = generic_color ;
@@ -478,7 +475,6 @@ function DStar_object(q, r0){
   par.normalise_decays() ;
   return par ;
 }
-
 function D0Star_object(q, r0){
   var par = new particle_object(2010, 0, r0, true) ;
   par.color = generic_color ;
@@ -525,7 +521,6 @@ function Ds_object(q, r0){
   par.normalise_decays() ;
   return par ;
 }
-
 function DsStar_object(q, r0){
   var par = new particle_object(2112, q, r0, true) ;
   par.color = generic_color ;
@@ -591,7 +586,6 @@ function B_object(q, r0){
   par.normalise_decays() ;
   return par ;
 }
-
 function B0_object(q, r0){
   var par = new particle_object(5280, q, r0, true) ;
   par.color = generic_color ;
@@ -634,14 +628,13 @@ function B0_object(q, r0){
   par.normalise_decays() ;
   return par ;
 }
-
 function Bs_object(q, r0){
-  var par = new particle_object(1969, q, r0, true) ;
+  var par = new particle_object(5367, q, r0, true) ;
   par.color = generic_color ;
   par.type = 'charged_hadron' ;
   par.matter = q ;
   par.w = 1e-20 ;
-  par.tau = 5.0e-13 ;
+  par.tau = 1.50e-12 ;
   par.pdgId = (q==1) ? 531 : -531 ;
   par.decays = [ 
     [0.006, [-13,19]] ,
@@ -662,11 +655,9 @@ function Bs_object(q, r0){
     [0.010, [321,310,211-211]] ,
     [0.009, [321,-321,211,-211,211]]
   ] ;
-  par.decays = [ [0.045, [333,211]] ] ;
   par.normalise_decays() ;
   return par ;
 }
-
 function Bc_object(q, r0){
   var par = new particle_object(1969, q, r0, true) ;
   par.color = generic_color ;
@@ -683,8 +674,62 @@ function Bc_object(q, r0){
   return par ;
 }
 
-
-
+function BStar_object(q, r0){
+  var par = new particle_object(5325, q, r0, true) ;
+  par.color = generic_color ;
+  par.type = 'charged_hadron' ;
+  par.matter = q ;
+  par.w = 1e-20 ;
+  par.tau = 1.0e-20 ;
+  par.pdgId = (q==1) ? -521 : 521 ;
+  par.decays = [
+    [0.001, [521,-22]]
+  ] ;
+  par.normalise_decays() ;
+  return par ;
+}
+function B0Star_object(q, r0){
+  var par = new particle_object(5325, q, r0, true) ;
+  par.color = generic_color ;
+  par.type = 'charged_hadron' ;
+  par.matter = q ;
+  par.w = 1e-20 ;
+  par.tau = 1.0e-20 ;
+  par.pdgId = (q==1) ? 511 : -511 ;
+  par.decays = [
+    [0.001, [511,-22]]
+  ] ;
+  par.normalise_decays() ;
+  return par ;
+}
+function BsStar_object(q, r0){
+  var par = new particle_object(5415, q, r0, true) ;
+  par.color = generic_color ;
+  par.type = 'charged_hadron' ;
+  par.matter = q ;
+  par.w = 1e-20 ;
+  par.tau = 1.0e-20 ;
+  par.pdgId = (q==1) ? 531 : -531 ;
+  par.decays = [ 
+    [1, [531,22]]
+  ] ;
+  par.normalise_decays() ;
+  return par ;
+}
+function BcStar_object(q, r0){
+  var par = new particle_object(6377, q, r0, true) ;
+  par.color = generic_color ;
+  par.type = 'charged_hadron' ;
+  par.matter = q ;
+  par.w = 1e-20 ;
+  par.tau = 1.0e-20 ;
+  par.pdgId = (q==1) ? 531 : -531 ;
+  par.decays = [ 
+    [1, [541,22]]
+  ] ;
+  par.normalise_decays() ;
+  return par ;
+}
 
 // Quarkonia
 function etaC_object(r0){
@@ -710,7 +755,6 @@ function etaC_object(r0){
   par.p4_0.t = E ;
   return par ;
 }
-
 function Jpsi_object(r0){
   var par = new particle_object(3097, 0, r0, true) ;
   par.color = generic_color ;
@@ -745,12 +789,13 @@ function virtual_photon_object(r0, m){
   par.decays = [ // BaBar physics book values
     //[1.04*0.5  , [511, -511]] ,
     //[1.04*0.5  , [521, -521]] ,
-    //[0.94      , [ 15,  -15]] ,
+    [0.94      , [ 15,  -15]] ,
     //[0.01      , [ 11,  -11, 22]] ,
     //[0.01      , [ 13,  -13, 22]] ,
-    //[1.30      , [  4,   -4]] ,
-    //[0.35      , [  3,   -3]] ,
-    [0.35      , [ 333,  22]] 
+    [1.30      , [  4,   -4]] ,
+    [1.30      , [ 313,   -313]] , 
+    //[0.35      , [  5,   -5]] ,
+    [0.35      , [  3,   -3]] 
     //[1.39      , [  2,   -2]] ,
     //[0.35      , [  1,   -1]] 
     //[0.1       , [443,   22]] // Arbitrary value for lulz
@@ -758,4 +803,30 @@ function virtual_photon_object(r0, m){
   ] ;
   par.normalise_decays() ;
   return par ;
+}
+
+function generic_virtual_photon_object(r0, m, decay_products){
+  var par = new particle_object(m, 0, r0, true) ;
+  par.color = generic_color ;
+  par.type = 'photon' ;
+  par.matter = 0 ;
+  par.w = 1e-20 ;
+  par.pdgId = 0 ;
+  par.decays = [ [1.0, decay_products] ] ;
+  par.normalise_decays() ;
+  return par ;
+}
+
+var current_collision_type = 'vpho' ;
+//current_collision_type = 'KKgamma' ;
+var collision_products = [] ;
+collision_products[   'eegamma'] = [  11,  -11,22] ;
+collision_products[ 'mumugamma'] = [  13,  -13,22] ;
+collision_products[   'KKgamma'] = [ 321, -321,22] ;
+collision_products[ 'pipigamma'] = [ 211, -211,22] ;
+collision_products['pbarpgamma'] = [2212,-2212,22] ;
+
+function collision_particle(r0, m){
+  if(current_collision_type=='vpho'){ return new virtual_photon_object(r0, m) ; }
+  return new generic_virtual_photon_object(r0, m, collision_products[current_collision_type]) ;
 }

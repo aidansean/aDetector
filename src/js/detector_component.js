@@ -1,6 +1,6 @@
 // These classes are for any detector components in a cylindrically symmetric detector.
 
-beampipe_object = function(name, zl, line_opacity, rgb){
+function beampipe_object(name, zl, line_opacity, rgb){
   this.name = name ;
   this.rgb = rgb ;
   this.z_length = zl ;
@@ -12,16 +12,12 @@ beampipe_object = function(name, zl, line_opacity, rgb){
   this.outer_radius = 0 ;
   this.z_start = -0.5*this.z_length ;
   this.z_end   =  0.5*this.z_length ;
+  this.type = 'beampipe' ;
   
   this.stopping_powers = [] ;
-  this.stopping_powers['electron'        ] = 0.0 ;
-  this.stopping_powers['photon'          ] = 0.0 ;
-  this.stopping_powers['muon'            ] = 0.0 ;
-  this.stopping_powers['tau'             ] = 0.0 ;
-  this.stopping_powers['neutrino'        ] = 0.0 ;
-  this.stopping_powers['ephemeral_hadron'] = 0.0 ;
-  this.stopping_powers['charged_hadron'  ] = 0.0 ;
-  this.stopping_powers['neutral_hadron'  ] = 0.0 ;
+  for(var i=0 ; i<particle_species.length ; i++){
+    this.stopping_powers[particle_species[i]] = 0.0 ;
+  }
   
   var cell = new component_cell(this.rgb, this.rgb) ;
   var points = [ [0,0,-0.5*this.z_length] , [0,0,0.5*this.z_length] ] ;
@@ -33,8 +29,22 @@ beampipe_object = function(name, zl, line_opacity, rgb){
   this.get_block = function(xyz){
     return null ;
   }
+  this.make_xml_node = function(){
+    var element = xmlDoc.createElement('detector_component') ;
+    element.setAttribute('name'        , this.name        ) ;
+    element.setAttribute('type'        , this.type        ) ;
+    element.setAttribute('rgb'         , this.rgb         ) ;
+    element.setAttribute('line_opacity', this.line_opacity) ;
+    element.setAttribute('z_length'    , this.z_length    ) ;
+    
+    var stopping_powers_element = xmlDoc.createElement('stopping_powers') ;
+    for(var i=0 ; i<particle_species.length ; i++){
+      stopping_powers_element.setAttribute(particle_species[i], this.stopping_powers[particle_species[i]]) ;
+    }
+    element.appendChild(stopping_powers_element) ;
+    return element ;
+  }
 }
-
 function calorimeter_block(points, rgb_plane, rgb_line){
   // A trapezoidal shape, defining the block
   // The natural coordinates are r, phi, z
@@ -59,7 +69,6 @@ function tracker_object(name, ri, ro, z_start, z_end, nl, nseg, nsec, padding_xy
   tracker.stopping_powers['neutral_hadron'  ] = 0.004 ;
   return tracker ;
 }
-
 function ecal_object(name, ri, ro, z_start, z_end, nl, nseg, nsec, padding_xy, padding_z, rgb_plane, rgb_line){
   var ecal = new calorimeter_object(name, 'ecal', ri, ro, z_start, z_end, nl, nseg, nsec, padding_xy, padding_z, rgb_plane, rgb_line) ;
   ecal.stopping_powers['electron'        ] = 0.025 ;
@@ -72,7 +81,6 @@ function ecal_object(name, ri, ro, z_start, z_end, nl, nseg, nsec, padding_xy, p
   ecal.stopping_powers['neutral_hadron'  ] = 0.005 ;
   return ecal ;
 }
-
 function hcal_object(name, ri, ro, z_start, z_end, nl, nseg, nsec, padding_xy, padding_z, rgb_plane, rgb_line){
   var hcal = new calorimeter_object(name, 'hcal', ri, ro, z_start, z_end, nl, nseg, nsec, padding_xy, padding_z, rgb_plane, rgb_line) ;
   hcal.stopping_powers['electron'        ] = 0.020 ;
@@ -208,6 +216,71 @@ function calorimeter_object(name, type, ri, ro, z_start, z_end, nl, nseg, nsec, 
     if(w==null) return null ;
     return this.blocks[u][v][w] ;
   }
+  
+  this.make_xml_node = function(){
+    var element = xmlDoc.createElement('detector_component') ;
+    element.setAttribute('name'        , this.name        ) ;
+    element.setAttribute('type'        , this.type        ) ;
+    element.setAttribute('rgb_plane'   , this.rgb_plane   ) ;
+    element.setAttribute('rgb_line'    , this.rgb_line    ) ;
+    element.setAttribute('inner_radius', this.inner_radius) ;
+    element.setAttribute('outer_radius', this.outer_radius) ;
+    element.setAttribute('z_start'     , this.z_start     ) ;
+    element.setAttribute('z_end'       , this.z_end       ) ;
+    element.setAttribute('n_layers'    , this.n_layers    ) ;
+    element.setAttribute('n_segments'  , this.n_segments  ) ;
+    element.setAttribute('n_sectors'   , this.n_sectors   ) ;
+    element.setAttribute('padding_xy'  , this.padding_xy  ) ;
+    element.setAttribute('padding_z'   , this.padding_z   ) ;
+    
+    var stopping_powers_element = xmlDoc.createElement('stopping_powers') ;
+    for(var i=0 ; i<particle_species.length ; i++){
+      stopping_powers_element.setAttribute(particle_species[i], this.stopping_powers[particle_species[i]]) ;
+    }
+    element.appendChild(stopping_powers_element) ;
+    return element ;
+  }
+}
+
+function detector_component_from_xml(node){
+  var component = null ;
+  var type = node.getAttribute('type') ;
+  if(type=='beampipe'){
+    var name         = node.getAttribute('name'        ) ;
+    var rgb          = node.getAttribute('rgb'         ) ;
+    var line_opacity = parseFloat(node.getAttribute('line_opacity')) ;
+    var zl           = parseFloat(node.getAttribute('z_length'    )) ;
+    component = new beampipe_object(name, zl, line_opacity, rgb) ;
+  }
+  else{
+    var name         = node.getAttribute('name'        ) ;
+    var rgb_plane    = node.getAttribute('rgb_plane'   ) ;
+    var rgb_line     = node.getAttribute('rgb_line'    ) ;
+    var ri           = parseFloat(node.getAttribute('inner_radius')) ;
+    var ro           = parseFloat(node.getAttribute('outer_radius')) ;
+    var z_start      = parseFloat(node.getAttribute('z_start'     )) ;
+    var z_end        = parseFloat(node.getAttribute('z_end'       )) ;
+    var nl           = parseInt  (node.getAttribute('n_layers'    )) ;
+    var nseg         = parseInt  (node.getAttribute('n_segments'  )) ;
+    var nsec         = parseInt  (node.getAttribute('n_sectors'   )) ;
+    var padding_xy   = parseFloat(node.getAttribute('padding_xy'  )) ;
+    var padding_z    = parseFloat(node.getAttribute('padding_z'   )) ;
+    component = new calorimeter_object(name, type, ri, ro, z_start, z_end, nl, nseg, nsec, padding_xy, padding_z, rgb_plane, rgb_line) ;
+  }
+  var stopping_powers_element = null ;
+  for(var i=0 ; i<node.childNodes.length ; i++){
+    var child = node.childNodes[i] ;
+    if(child.nodeName=='stopping_powers'){
+      stopping_powers_element = child ;
+      break ;
+    }
+  }
+  if(stopping_powers_element){
+    for(var i=0 ; i<particle_species.length ; i++){
+      component.stopping_powers[particle_species[i]] = parseFloat(stopping_powers_element.getAttribute(particle_species[i])) ;
+    }
+  }
+  return component ;
 }
 
 // An individual cell, the smallest part of a detector components.

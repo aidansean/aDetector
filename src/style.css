@@ -22,7 +22,11 @@ div#outer_container{
   background-color : white ;
 }
 
-input#input_x, input#input_y, input#input_z, input#input_t, input#input_p, input#input_update_event_display_interval, input#input_update_particle_table_interval{
+div#plot_space_wrapper{
+  vertical-align : top ;
+}
+
+input#input_x, input#input_y, input#input_z, input#input_t, input#input_p, input#input_update_event_display_interval, input#input_update_particle_table_interval, input#input_update_histograms_interval{
   width : 40px ;
 }
 
@@ -57,6 +61,10 @@ th.particle_info, td.particle_info{
   width : 75px ;
   font : 8pt arial , sans-serif ;
   text-align : left ;
+  background : white ;
+}
+td.NaN{
+  background : #ffdddd ;
 }
 
 
@@ -208,3 +216,14 @@ canvas.plot{
 
 div#outer_container{
 }
+
+
+
+table#table_new_fill_histogram{
+  margin : auto ;
+}
+.th_new_fill_histogram{
+  background : #ddffff ;
+}
+
+

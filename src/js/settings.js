@@ -5,9 +5,13 @@ var counter =  0 ;
 var stop    = -1 ;
 var delay   =  5 ;
 
-var  draw_interval     = 1000 ;
-var table_interval     = 1 ;
-var n_trigger_attempts = 10 ;
+var n_success = 0 ;
+var n_failure = 0 ;
+
+var  draw_interval          = 1000 ;
+var table_interval          =    1 ;
+var plotspace_draw_interval =   10 ;
+var n_trigger_attempts      =   10 ;
 
 var stopwatch_delay = 1000 ;
 var stopwatch_time  =    0 ;
